@@ -2,12 +2,9 @@
 
 ## Description
 
-uNot (UniNotifier), the web resources supervisor service.
-This app provides the ability to be notified when the content of user-specified websites changes.
-In other words, about updates on them, which will be presented in the form of a text log. Only what the user
-has specified is loaded – all other objects (including ads) are ignored.
+The simple client for the Grammar Must Joy community.
 
-A detailed description of the app is available on [its own page](https://adslbarxatov.github.io/GrammarMustJoy)
+A detailed description of the app is available on [its own page](https://adslbarxatov.github.io/GrammarMustJoy/en)
 
 &nbsp;
 
@@ -15,12 +12,9 @@ A detailed description of the app is available on [its own page](https://adslbar
 
 ## Описание
 
-Служба наблюдения за состоянием веб-ресурсов.
-Это приложение предоставляет возможность получать уведомления об изменении состояния указанных пользователем
-веб-сайтов. Другими словами, об обновлениях, происходящих на них, которые представляются в виде текстового журнала.
-Загружается только то, что указал пользователь – все остальные объекты (включая рекламу) игнорируются.
+Простой клиент сообщества Grammar must joy.
 
-Подробное описание приложения доступно на [отдельной странице](https://adslbarxatov.github.io/GrammarMustJoy/ru)
+Подробное описание приложения доступно на [отдельной странице](https://adslbarxatov.github.io/GrammarMustJoy)
 
 &nbsp;
 
