@@ -2,7 +2,7 @@
 
 ## Description
 
-The simple client for the Grammar Must Joy community.
+The mini-client for the Grammar Must Joy community.
 
 A detailed description of the app is available on [its own page](https://adslbarxatov.github.io/GrammarMustJoy/en)
 
@@ -12,7 +12,7 @@ A detailed description of the app is available on [its own page](https://adslbar
 
 ## Описание
 
-Простой клиент сообщества Grammar must joy.
+Мини-клиент сообщества Grammar must joy.
 
 Подробное описание приложения доступно на [отдельной странице](https://adslbarxatov.github.io/GrammarMustJoy)
 
