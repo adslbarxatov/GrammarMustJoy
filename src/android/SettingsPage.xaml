@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="RD_AAOW.SettingsPage">
+
+	<ScrollView>
+		<StackLayout>
+
+			<!-- Настройки основного приложения -->
+			<Label x:Name="AppSettingsLabel" />
+
+			<StackLayout Orientation="Horizontal">
+				<Switch x:Name="KeepScreenOnSwitch" VerticalOptions="Center" />
+				<Label x:Name="KeepScreenOnLabel" VerticalTextAlignment="Center" />
+			</StackLayout>
+
+			<StackLayout Orientation="Horizontal">
+				<Switch x:Name="EnablePostSubscriptionSwitch" VerticalOptions="Center" />
+				<Label x:Name="EnablePostSubscriptionLabel" VerticalTextAlignment="Center" />
+			</StackLayout>
+
+			<!-- Настройки журнала -->
+			<BoxView VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="1" 
+					WidthRequest="200" Color="#505050" Margin="12" />
+
+			<Label x:Name="LogSettingsLabel" />
+
+			<StackLayout Orientation="Horizontal">
+				<Switch x:Name="NewsAtTheEndSwitch" VerticalOptions="Center" />
+				<Label x:Name="NewsAtTheEndLabel" VerticalTextAlignment="Center" />
+			</StackLayout>
+
+			<StackLayout Orientation="Horizontal">
+				<Switch x:Name="ReadModeSwitch" VerticalOptions="Center" />
+				<Label x:Name="ReadModeLabel" VerticalTextAlignment="Center" />
+			</StackLayout>
+
+			<StackLayout Orientation="Horizontal" Margin="3">
+				<Label x:Name="FontSizeFieldLabel" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" />
+
+				<Button x:Name="FontSizeIncButton" HorizontalOptions="Start" />
+				<Button x:Name="FontSizeDecButton" HorizontalOptions="Start" />
+			</StackLayout>
+
+			<Label />
+
+		</StackLayout>
+	</ScrollView>
+</ContentPage>
