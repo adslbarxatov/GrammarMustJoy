@@ -19,6 +19,13 @@
 				<Label x:Name="EnablePostSubscriptionLabel" VerticalTextAlignment="Center" />
 			</StackLayout>
 
+			<StackLayout Orientation="Horizontal" Margin="3">
+				<Label x:Name="GroupSizeFieldLabel" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" />
+
+				<Button x:Name="GroupSizeIncButton" HorizontalOptions="Start" />
+				<Button x:Name="GroupSizeDecButton" HorizontalOptions="Start" />
+			</StackLayout>
+
 			<!-- Настройки журнала -->
 			<BoxView VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="1" 
 					WidthRequest="200" Color="#505050" Margin="12" />

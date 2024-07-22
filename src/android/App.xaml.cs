@@ -21,9 +21,6 @@ namespace RD_AAOW
 		private const string semaphoreOn = "●";
 		private const string semaphoreOff = "○";
 
-		/*// Индекс текущей опрашиваемой новости
-		private int getNotificationIndex = -1;*/
-
 		// Флаг завершения прокрутки журнала
 		private bool needsScroll = true;
 
@@ -51,12 +48,12 @@ namespace RD_AAOW
 
 		private ContentPage settingsPage, aboutPage, logPage;
 
-		private Label aboutLabel, fontSizeFieldLabel, aboutFontSizeField;
+		private Label aboutLabel, fontSizeFieldLabel, groupSizeFieldLabel, aboutFontSizeField;
 
 		private Switch nightModeSwitch, newsAtTheEndSwitch, keepScreenOnSwitch,
 			enablePostSubscriptionSwitch;
 
-		private Button centerButton, scrollUpButton, scrollDownButton, menuButton;
+		private Button centerButton, scrollUpButton, scrollDownButton, menuButton, addButton;
 
 		private ListView mainLog;
 
@@ -109,7 +106,7 @@ namespace RD_AAOW
 				RDLabelTypes.DefaultLeft);
 			enablePostSubscriptionSwitch = AndroidSupport.ApplySwitchSettings (settingsPage,
 				"EnablePostSubscriptionSwitch", false, settingsFieldBackColor,
-				EnablePostSubscription_Toggled, NotificationsSupport.EnablePostSubscription);
+				EnablePostSubscription_Toggled, GMJ.EnablePostSubscription);
 
 			#region Страница "О программе"
 
@@ -186,6 +183,8 @@ namespace RD_AAOW
 
 			menuButton = AndroidSupport.ApplyButtonSettings (logPage, "MenuButton",
 				RDDefaultButtons.Menu, logFieldBackColor, SelectPage);
+			addButton = AndroidSupport.ApplyButtonSettings (logPage, "AddButton",
+				RDDefaultButtons.Increase, logFieldBackColor, OfferTheRecord);
 
 			AndroidSupport.ApplyLabelSettings (settingsPage, "LogSettingsLabel",
 				"Главный журнал", RDLabelTypes.HeaderLeft);
@@ -204,6 +203,18 @@ namespace RD_AAOW
 				RDDefaultButtons.Decrease, settingsFieldBackColor, FontSizeChanged);
 
 			FontSizeChanged (null, null);
+
+			// Размер группы запрашиваемых записей
+			groupSizeFieldLabel = AndroidSupport.ApplyLabelSettings (settingsPage, "GroupSizeFieldLabel",
+				"", RDLabelTypes.DefaultLeft);
+			groupSizeFieldLabel.TextType = TextType.Html;
+
+			AndroidSupport.ApplyButtonSettings (settingsPage, "GroupSizeIncButton",
+				RDDefaultButtons.Increase, settingsFieldBackColor, GroupSizeChanged);
+			AndroidSupport.ApplyButtonSettings (settingsPage, "GroupSizeDecButton",
+				RDDefaultButtons.Decrease, settingsFieldBackColor, GroupSizeChanged);
+
+			GroupSizeChanged (null, null);
 
 			// Запуск цикла обратной связи (без ожидания)
 			FinishBackgroundRequest ();
@@ -289,7 +300,7 @@ namespace RD_AAOW
 
 				case NSTipTypes.ShareButton:
 					msg = "Эти опция позволяет поделиться текстом уведомления";
-					if (NotificationsSupport.EnablePostSubscription)
+					if (GMJ.EnablePostSubscription)
 						msg += ("." + RDLocale.RNRN +
 							"Обратите внимание, что приложение добавляет к текстам, которыми Вы делитесь, " +
 							"ссылки на источники информации (в целях соблюдения прав авторов). Рекомендуется " +
@@ -508,7 +519,7 @@ namespace RD_AAOW
 						await ShowTips (NSTipTypes.ShareButton);
 
 					await Share.RequestAsync ((notItem.Header + RDLocale.RNRN + notItem.Text +
-						(NotificationsSupport.EnablePostSubscription ? (RDLocale.RNRN + notLink) : "")).Replace ("\r", ""),
+						(GMJ.EnablePostSubscription ? (RDLocale.RNRN + notLink) : "")).Replace ("\r", ""),
 						ProgramDescription.AssemblyVisibleName);
 					break;
 
@@ -516,7 +527,7 @@ namespace RD_AAOW
 				case 2:
 				case 12:
 					RDGenerics.SendToClipboard ((notItem.Header + RDLocale.RNRN + notItem.Text +
-						(NotificationsSupport.EnablePostSubscription ? (RDLocale.RNRN + notLink) : "")).Replace ("\r", ""),
+						(GMJ.EnablePostSubscription ? (RDLocale.RNRN + notLink) : "")).Replace ("\r", ""),
 						true);
 					break;
 
@@ -537,7 +548,7 @@ namespace RD_AAOW
 			// Переключение состояния кнопок и свичей
 			centerButtonEnabled = State;
 
-			settingsPage.IsEnabled = aboutPage.IsEnabled = State;
+			/*settingsPage.IsEnabled = aboutPage.IsEnabled = State;
 			if (!State)
 				{
 				settingsPage.BackgroundColor = aboutPage.BackgroundColor = solutionLockedBackColor;
@@ -546,7 +557,8 @@ namespace RD_AAOW
 				{
 				settingsPage.BackgroundColor = settingsMasterBackColor;
 				aboutPage.BackgroundColor = aboutMasterBackColor;
-				}
+				}*/
+			menuButton.IsVisible = addButton.IsVisible = State;
 
 			// Обновление статуса
 			UpdateLogButton (!State, false);
@@ -594,28 +606,35 @@ namespace RD_AAOW
 			// Запуск и разбор
 			AndroidSupport.StopRequested = false; // Разблокировка метода GetHTML
 			string newText = "";
+			uint group = NotificationsSupport.GroupSize;
 
-			for (int i = 0; i < 3; i++)     // Минимизация возможных попаданий в пропуски
+			for (int i = 0; i < group; i++)
 				{
+				// Антиспам
+				if (i > 0)
+					Thread.Sleep (1000);
+
 				newText = await Task.Run<string> (GMJ.GetRandomGMJ);
 
-				if (!newText.Contains (GMJ.SourceNoReturnPattern))
+				/*if (!newText.Contains (GMJ.SourceNoReturnPattern))
 					break;
-				}
+				}*/
 
-			if (newText == "")
-				{
-				AndroidSupport.ShowBalloon ("Grammar must joy не ответила на запрос. Проверьте интернет-соединение", true);
-				}
-			else if (newText.Contains (GMJ.SourceNoReturnPattern))
-				{
-				AndroidSupport.ShowBalloon (newText, true);
-				}
-			else
-				{
-				AddTextToLog (newText);
-				needsScroll = true;
-				UpdateLog ();
+				if (newText == "")
+					{
+					AndroidSupport.ShowBalloon ("Grammar must joy не ответила на запрос. " +
+						"Проверьте интернет-соединение", false);
+					}
+				else if (newText.Contains (GMJ.SourceNoReturnPattern))
+					{
+					AndroidSupport.ShowBalloon (newText, false);
+					}
+				else
+					{
+					AddTextToLog (newText);
+					needsScroll = true;
+					UpdateLog ();
+					}
 				}
 
 			// Разблокировка
@@ -668,6 +687,17 @@ namespace RD_AAOW
 				}
 			}
 
+		// Предложение записи сообществу
+		private async void OfferTheRecord (object sender, EventArgs e)
+			{
+			if (!await AndroidSupport.ShowMessage ("Хотите предложить запись в архив GMJ?",
+				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Yes),
+				RDLocale.GetDefaultText (RDLDefaultTexts.Button_No)))
+				return;
+
+			await AndroidSupport.AskDeveloper ();
+			}
+
 		#endregion
 
 		#region Основные настройки
@@ -702,18 +732,18 @@ namespace RD_AAOW
 				{
 				logPage.BackgroundColor = mainLog.BackgroundColor = centerButton.BackgroundColor =
 					scrollUpButton.BackgroundColor = scrollDownButton.BackgroundColor =
-					menuButton.BackgroundColor = logReadModeColor;
+					menuButton.BackgroundColor = addButton.BackgroundColor = logReadModeColor;
 				NotificationsSupport.LogFontColor = logMasterBackColor;
 				}
 			else
 				{
 				logPage.BackgroundColor = mainLog.BackgroundColor = centerButton.BackgroundColor =
 					scrollUpButton.BackgroundColor = scrollDownButton.BackgroundColor =
-					menuButton.BackgroundColor = logMasterBackColor;
+					menuButton.BackgroundColor = addButton.BackgroundColor = logMasterBackColor;
 				NotificationsSupport.LogFontColor = logReadModeColor;
 				}
 			scrollUpButton.TextColor = scrollDownButton.TextColor = menuButton.TextColor =
-				NotificationView.CurrentAntiBackColor;
+				addButton.TextColor = NotificationView.CurrentAntiBackColor;
 
 			// Принудительное обновление (только не при старте)
 			if (e != null)
@@ -754,6 +784,29 @@ namespace RD_AAOW
 				}
 			}
 
+		// Изменение размера шрифта лога
+		private void GroupSizeChanged (object sender, EventArgs e)
+			{
+			uint groupSize = NotificationsSupport.GroupSize;
+
+			if (e != null)
+				{
+				Button b = (Button)sender;
+				if (AndroidSupport.IsNameDefault (b.Text, RDDefaultButtons.Increase) &&
+					(groupSize < 5))
+					groupSize++;
+				else if (AndroidSupport.IsNameDefault (b.Text, RDDefaultButtons.Decrease) &&
+					(groupSize > 1))
+					groupSize--;
+
+				NotificationsSupport.GroupSize = groupSize;
+				}
+
+			// Принудительное обновление
+			groupSizeFieldLabel.Text = string.Format ("Число записей, получаемых<br/>по одному нажатию кнопки: " +
+				"<b>{0:D}</b>", groupSize.ToString ());
+			}
+
 		// Включение / выключение подписи
 		private async void EnablePostSubscription_Toggled (object sender, ToggledEventArgs e)
 			{
@@ -765,7 +818,7 @@ namespace RD_AAOW
 					"источника. Спасибо!",
 					RDLocale.GetDefaultText (RDLDefaultTexts.Button_OK));
 
-			NotificationsSupport.EnablePostSubscription = enablePostSubscriptionSwitch.IsToggled;
+			GMJ.EnablePostSubscription = enablePostSubscriptionSwitch.IsToggled;
 			}
 
 		#endregion
