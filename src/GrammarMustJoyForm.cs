@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace RD_AAOW
@@ -37,21 +38,13 @@ namespace RD_AAOW
 			if (GMJ.EnablePostSubscription)
 				GMJ.EnablePostSubscription = false;
 
-			/*ReloadNotificationsList ();
-			if TGT
-			GetGMJ.Visible = false;
-			else
-			GetGMJ.Visible = RDLocale.IsCurrentLanguageRuRu;
-			endif*/
-
 			// Получение настроек
 			RDGenerics.LoadWindowDimensions (this);
 			ReadMode.Checked = RDGenerics.GetSettings (readPar, false);
-			/*callWindowOnUrgents = RDGenerics.GetSettings (callWindowOnUrgentsPar, false);
-			*/
 			try
 				{
 				FontSizeField.Value = RDGenerics.GetSettings (fontSizePar, 130) / 10.0m;
+				GroupCountField.Value = RDGenerics.GetSettings (groupCountPar, 1);
 				}
 			catch { }
 
@@ -61,10 +54,6 @@ namespace RD_AAOW
 			ni.Visible = true;
 
 			ni.ContextMenu = new ContextMenu ();
-
-			/*ni.ContextMenu.MenuItems.Add (new MenuItem (RDLocale.GetText ("MainMenuOption02"), ShowSettings));
-			ni.ContextMenu.MenuItems[0].Enabled = RDGenerics.AppHasAccessRights (false, true);*/
-
 			ni.ContextMenu.MenuItems.Add (new MenuItem (
 				RDLocale.GetDefaultText (RDLDefaultTexts.Control_AppAbout), AboutService));
 			ni.ContextMenu.MenuItems.Add (new MenuItem (
@@ -80,10 +69,6 @@ namespace RD_AAOW
 			GrammarMustJoyForm_Resize (null, null);
 			if (hideWindow)
 				this.Hide ();
-
-			/*// Запуск
-			MainTimer.Interval = (int)ProgramDescription.MasterFrameLength * 4;
-			MainTimer.Enabled = true;*/
 			}
 
 		// Завершение работы службы
@@ -100,10 +85,6 @@ namespace RD_AAOW
 				{
 				// Остановка
 				ni.Visible = false;
-				/*MainTimer.Enabled = false;
-
-				// Освобождение ресурсов
-				ns.Dispose ();*/
 				}
 
 			// Скрытие окна просмотра
@@ -127,9 +108,6 @@ namespace RD_AAOW
 			if (e.Button != MouseButtons.Left)
 				return;
 
-			/*// Отмена состояния сообщений
-			ns.HasUrgentNotifications = false;*/
-
 			// Обработка состояния
 			if (this.Visible)
 				{
@@ -147,9 +125,6 @@ namespace RD_AAOW
 		// Закрытие окна просмотра
 		private void BClose_Click (object sender, EventArgs e)
 			{
-			/*// Отмена состояния сообщений
-			ns.HasUrgentNotifications = false;*/
-
 			this.Close ();
 			}
 
@@ -177,9 +152,9 @@ namespace RD_AAOW
 		private void GrammarMustJoyForm_Resize (object sender, EventArgs e)
 			{
 			MainText.Width = this.Width - 38;
-			MainText.Height = this.Height - 87;
+			MainText.Height = this.Height - ButtonsPanel.Height - 53;
 
-			ButtonsPanel.Top = MainText.Top + MainText.Height - 1;
+			ButtonsPanel.Top = MainText.Top + MainText.Height + 1;
 			}
 
 		// Сохранение размера формы
@@ -191,7 +166,24 @@ namespace RD_AAOW
 		// Запрос сообщения от GMJ
 		private void GetGMJExecutor (object sender, DoWorkEventArgs e)
 			{
-			e.Result = GMJ.GetRandomGMJ ();
+			uint group = RDGenerics.GetSettings (groupCountPar, 1);
+			BackgroundWorker bw = (BackgroundWorker)sender;
+			string res = "";
+			string sp = groupSplitter[0].ToString ();
+			string limit = " из " + group.ToString ();
+
+			for (int i = 0; i < group; i++)
+				{
+				// Антиспам
+				if (i > 0)
+					Thread.Sleep (1000);
+
+				res += (GMJ.GetRandomGMJ () + sp);
+				bw.ReportProgress ((int)(HardWorkExecutor.ProgressBarSize * (i + 1) / group),
+					"Запрошено " + (i + 1).ToString () + limit);
+				}
+
+			e.Result = res;
 			}
 
 		private void GetGMJ_Click (object sender, EventArgs e)
@@ -199,25 +191,36 @@ namespace RD_AAOW
 			// Запрос записи
 			RDGenerics.RunWork (GetGMJExecutor, null, "Запрос случайной записи...",
 				RDRunWorkFlags.CaptionInTheMiddle);
-			string s = RDGenerics.WorkResultAsString;
-			string item;
+			string items = "";
 
-			if (s != "")
-				item = s;
+			string[] values = RDGenerics.WorkResultAsString.Split (groupSplitter,
+				StringSplitOptions.RemoveEmptyEntries);
+			bool empty = string.IsNullOrWhiteSpace (MainText.Text);
+
+			if (values.Length > 0)
+				{
+				for (int i = 0; i < values.Length; i++)
+					items += ((empty ? "" : RDLocale.RNRN + RDLocale.RNRN) +
+						values[i].Replace (NotificationsSet.MainLogItemSplitter.ToString (),
+						RDLocale.RN));
+				}
 			else
-				item = "GMJ не отвечает на запрос. Проверьте интернет-соединение";
+				{
+				items = (empty ? "" : RDLocale.RNRN) +
+					"GMJ не отвечает на запрос. Проверьте интернет-соединение";
+				}
 
-			// Отображение
 			// Добавление в главное окно
-			if ((MainText.Text.Length + item.Length > ProgramDescription.MasterLogMaxLength) &&
-				(MainText.Text.Length > item.Length))   // Бывает и так
-				MainText.Text = MainText.Text.Substring (item.Length, MainText.Text.Length - item.Length);
-			if (MainText.Text.Length > 0)
+			if ((MainText.Text.Length + items.Length > ProgramDescription.MasterLogMaxLength) &&
+				(MainText.Text.Length > items.Length))   // Бывает и так
+				MainText.Text = MainText.Text.Substring (items.Length, MainText.Text.Length - items.Length);
+			/*if (MainText.Text.Length > 0)
 				MainText.AppendText (RDLocale.RNRN + RDLocale.RN);
 
 			// Добавление и форматирование
 			MainText.AppendText (item.Replace (NotificationsSet.MainLogItemSplitter.ToString (), RDLocale.RN));
-			MainText.AppendText (RDLocale.RN);
+			MainText.AppendText (RDLocale.RN);*/
+			MainText.AppendText (items);
 			}
 
 		// Изменение размера шрифта
@@ -227,5 +230,30 @@ namespace RD_AAOW
 			RDGenerics.SetSettings (fontSizePar, (uint)(FontSizeField.Value * 10.0m));
 			}
 		private const string fontSizePar = "FontSize";
+
+		// Изменение длины группы
+		private void GroupCountField_ValueChanged (object sender, EventArgs e)
+			{
+			RDGenerics.SetSettings (groupCountPar, (uint)GroupCountField.Value);
+			}
+		private const string groupCountPar = "GroupCount";
+		private char[] groupSplitter = new char[] { '\x1' };
+
+		// Вызов справки
+		private void BHelp_Click (object sender, EventArgs e)
+			{
+			RDGenerics.ShowAbout (false);
+			}
+
+		// Предложение записей
+		private void BAdd_Click (object sender, EventArgs e)
+			{
+			if (RDGenerics.MessageBox (RDMessageTypes.Question_Center, GMJ.SuggestionMessage,
+				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Yes),
+				RDLocale.GetDefaultText (RDLDefaultTexts.Button_No)) != RDMessageButtons.ButtonOne)
+				return;
+
+			AboutForm.AskDeveloper ();
+			}
 		}
 	}
