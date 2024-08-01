@@ -16,7 +16,7 @@
 
 			<StackLayout Orientation="Horizontal">
 				<Switch x:Name="EnablePostSubscriptionSwitch" VerticalOptions="Center" />
-				<Label x:Name="EnablePostSubscriptionLabel" VerticalTextAlignment="Center" />
+				<Label x:Name="EnablePostSubscriptionLabel" VerticalOptions="Center" VerticalTextAlignment="Center" />
 			</StackLayout>
 
 			<StackLayout Orientation="Horizontal" Margin="3">

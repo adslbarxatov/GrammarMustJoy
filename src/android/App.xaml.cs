@@ -102,7 +102,7 @@ namespace RD_AAOW
 				false, settingsFieldBackColor, KeepScreenOnSwitch_Toggled, NotificationsSupport.KeepScreenOn);
 
 			AndroidSupport.ApplyLabelSettings (settingsPage, "EnablePostSubscriptionLabel",
-				"Добавлять ссылку на оригинал записи к тексту\nпри действиях «Скопировать» и «Поделиться»",
+				"Добавлять ссылку на оригинал\nзаписи к тексту при действиях\n«Скопировать» и «Поделиться»",
 				RDLabelTypes.DefaultLeft);
 			enablePostSubscriptionSwitch = AndroidSupport.ApplySwitchSettings (settingsPage,
 				"EnablePostSubscriptionSwitch", false, settingsFieldBackColor,
@@ -140,10 +140,9 @@ namespace RD_AAOW
 			AndroidSupport.ApplyLabelSettings (aboutPage, "HelpHeaderLabel",
 				RDLocale.GetDefaultText (RDLDefaultTexts.Control_AppAbout),
 				RDLabelTypes.HeaderLeft);
-			AndroidSupport.ApplyLabelSettings (aboutPage, "HelpTextLabel",
-				RDGenerics.GetEncoding (RDEncodings.UTF8).
-				GetString ((byte[])RD_AAOW.Properties.Resources.ResourceManager.
-				GetObject (RDLocale.GetHelpFilePath ())), RDLabelTypes.SmallLeft);
+			Label htl = AndroidSupport.ApplyLabelSettings (aboutPage, "HelpTextLabel",
+				AndroidSupport.GetAppHelpText (), RDLabelTypes.SmallLeft);
+			htl.TextType = TextType.Html;
 
 			FontSizeButton_Clicked (null, null);
 
@@ -547,17 +546,6 @@ namespace RD_AAOW
 			{
 			// Переключение состояния кнопок и свичей
 			centerButtonEnabled = State;
-
-			/*settingsPage.IsEnabled = aboutPage.IsEnabled = State;
-			if (!State)
-				{
-				settingsPage.BackgroundColor = aboutPage.BackgroundColor = solutionLockedBackColor;
-				}
-			else
-				{
-				settingsPage.BackgroundColor = settingsMasterBackColor;
-				aboutPage.BackgroundColor = aboutMasterBackColor;
-				}*/
 			menuButton.IsVisible = addButton.IsVisible = State;
 
 			// Обновление статуса
@@ -615,11 +603,6 @@ namespace RD_AAOW
 					Thread.Sleep (1000);
 
 				newText = await Task.Run<string> (GMJ.GetRandomGMJ);
-
-				/*if (!newText.Contains (GMJ.SourceNoReturnPattern))
-					break;
-				}*/
-
 				if (newText == "")
 					{
 					AndroidSupport.ShowBalloon ("Grammar must joy не ответила на запрос. " +
@@ -690,7 +673,7 @@ namespace RD_AAOW
 		// Предложение записи сообществу
 		private async void OfferTheRecord (object sender, EventArgs e)
 			{
-			if (!await AndroidSupport.ShowMessage ("Хотите предложить запись в архив GMJ?",
+			if (!await AndroidSupport.ShowMessage (GMJ.SuggestionMessage,
 				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Yes),
 				RDLocale.GetDefaultText (RDLDefaultTexts.Button_No)))
 				return;
