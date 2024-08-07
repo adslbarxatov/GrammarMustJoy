@@ -49,6 +49,22 @@
 				<Button x:Name="FontSizeDecButton" HorizontalOptions="Start" />
 			</StackLayout>
 
+			<!-- Настройки изображений -->
+			<BoxView VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="1" 
+					WidthRequest="200" Color="#505050" Margin="12" />
+
+			<Label x:Name="PicturesLabel" />
+
+			<StackLayout Orientation="Horizontal">
+				<Label x:Name="PicturesBackLabel" VerticalOptions="Center" />
+				<Button x:Name="PicturesBackButton" VerticalOptions="Center" />
+			</StackLayout>
+
+			<StackLayout Orientation="Horizontal">
+				<Switch x:Name="PTextLeftSwitch" VerticalOptions="Center" />
+				<Label x:Name="PTextLeftLabel" VerticalTextAlignment="Center" />
+			</StackLayout>
+
 			<Label />
 
 		</StackLayout>

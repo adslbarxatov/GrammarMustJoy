@@ -1,18 +1,39 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.RD_AAOW.GrammarMustJoy"
-	android:installLocation="internalOnly" android:versionCode="600108" android:versionName="1.1.4">
+	android:installLocation="internalOnly" android:versionCode="600110" android:versionName="1.2.5">
 
 	<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="34" />
 
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-	<application android:label="Grammar must joy" android:icon="@drawable/launcher_foreground" />
+	<!-- Поддержка Android TV -->
+	<uses-feature android:name="android.software.leanback" android:required="false" />
+	<uses-feature android:name="android.hardware.touchscreen" android:required="false" />
 
+	<application android:label="Grammar must joy" android:icon="@drawable/launcher_foreground"
+		android:banner="@drawable/banner">
+		
+		<activity android:name="com.RD_AAOW.TvActivity" android:label="Grammar must joy for TV"
+			android:theme="@style/SplashTheme" android:icon="@drawable/launcher_foreground"
+			android:exported="true">
+
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+			</intent-filter>
+
+		</activity>
+
+	</application>
+
+	<!-- Нормальная работа ссылок mailto на Android 11 и новее -->
 	<queries>
 		<intent>
 			<action android:name="android.intent.action.SENDTO" />
 			<data android:scheme="mailto" />
 		</intent>
 	</queries>
+	
 </manifest>

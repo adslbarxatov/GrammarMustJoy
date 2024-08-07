@@ -25,7 +25,7 @@ namespace RD_AAOW
 		private bool needsScroll = true;
 
 		// Сформированные контекстные меню
-		private List<List<string>> tapMenuItems = new List<List<string>> ();
+		private List<List<string>> tapMenuItems2 = new List<List<string>> ();
 		private List<string> specialOptions = new List<string> ();
 
 		// Цветовая схема
@@ -51,13 +51,15 @@ namespace RD_AAOW
 		private Label aboutLabel, fontSizeFieldLabel, groupSizeFieldLabel, aboutFontSizeField;
 
 		private Switch nightModeSwitch, newsAtTheEndSwitch, keepScreenOnSwitch,
-			enablePostSubscriptionSwitch;
+			enablePostSubscriptionSwitch, pTextOnTheLeftSwitch;
 
-		private Button centerButton, scrollUpButton, scrollDownButton, menuButton, addButton;
+		private Button centerButton, scrollUpButton, scrollDownButton, menuButton, addButton,
+			pictureBackButton;
 
 		private ListView mainLog;
 
 		private List<string> pageVariants = new List<string> ();
+		private List<string> pictureBackVariants = new List<string> ();
 
 		#endregion
 
@@ -70,15 +72,14 @@ namespace RD_AAOW
 			{
 			// Инициализация
 			InitializeComponent ();
-			flags = AndroidSupport.GetAppStartupFlags (RDAppStartupFlags.Huawei | RDAppStartupFlags.CanReadFiles |
-				RDAppStartupFlags.CanWriteFiles | RDAppStartupFlags.CanShowNotifications);
+			flags = AndroidSupport.GetAppStartupFlags (RDAppStartupFlags.DisableXPUN | RDAppStartupFlags.CanWriteFiles);
 
 			if (!RDLocale.IsCurrentLanguageRuRu)
 				RDLocale.CurrentLanguage = RDLanguages.ru_ru;
 
 			// Общая конструкция страниц приложения
 			MainPage = new MasterPage ();
-			MasterPage.AppEx = this;
+			/*MasterPage.AppEx = this;*/
 
 			settingsPage = AndroidSupport.ApplyPageSettings (new SettingsPage (), "SettingsPage",
 				"Настройки приложения", settingsMasterBackColor);
@@ -89,7 +90,7 @@ namespace RD_AAOW
 
 			AndroidSupport.SetMasterPage (MainPage, logPage, logMasterBackColor);
 
-			if (!NotificationsSet.TipsState.HasFlag (NSTipTypes.PolicyTip))
+			if (!NotificationsSupport.TipsState.HasFlag (NSTipTypes.PolicyTip))
 				AndroidSupport.SetCurrentPage (settingsPage, settingsMasterBackColor);
 
 			// Настройки просмотра
@@ -170,7 +171,7 @@ namespace RD_AAOW
 
 			// Режим чтения
 			AndroidSupport.ApplyLabelSettings (settingsPage, "ReadModeLabel",
-				"Тёмная тема для основного журнала", RDLabelTypes.DefaultLeft);
+				"Тёмная тема для журнала", RDLabelTypes.DefaultLeft);
 			nightModeSwitch = AndroidSupport.ApplySwitchSettings (settingsPage, "ReadModeSwitch",
 				false, settingsFieldBackColor, NightModeSwitch_Toggled, NotificationsSupport.LogReadingMode);
 
@@ -215,6 +216,21 @@ namespace RD_AAOW
 
 			GroupSizeChanged (null, null);
 
+			// Настройки картинок
+			AndroidSupport.ApplyLabelSettings (settingsPage, "PicturesLabel",
+				"Картинки", RDLabelTypes.HeaderLeft);
+
+			AndroidSupport.ApplyLabelSettings (settingsPage, "PicturesBackLabel",
+				"Фон картинок:", RDLabelTypes.DefaultLeft);
+			pictureBackButton = AndroidSupport.ApplyButtonSettings (settingsPage, "PicturesBackButton",
+				GMJPicture.BackgroundNames[(int)NotificationsSupport.BackgroundType], settingsFieldBackColor,
+				PictureBack_Clicked, false);
+
+			AndroidSupport.ApplyLabelSettings (settingsPage, "PTextLeftLabel",
+				"Выровнять текст по левой стороне", RDLabelTypes.DefaultLeft);
+			pTextOnTheLeftSwitch = AndroidSupport.ApplySwitchSettings (settingsPage, "PTextLeftSwitch",
+				false, settingsFieldBackColor, PTextOnTheLeft_Toggled, NotificationsSupport.PicturesTextOnTheLeft);
+
 			// Запуск цикла обратной связи (без ожидания)
 			FinishBackgroundRequest ();
 
@@ -256,18 +272,18 @@ namespace RD_AAOW
 		private async void ShowStartupTips ()
 			{
 			// Контроль XPUN
-			if (!flags.HasFlag (RDAppStartupFlags.Huawei))
+			if (!flags.HasFlag (RDAppStartupFlags.DisableXPUN))
 				await AndroidSupport.XPUNLoop ();
 
 			// Требование принятия Политики
-			if (!NotificationsSet.TipsState.HasFlag (NSTipTypes.PolicyTip))
+			if (!NotificationsSupport.TipsState.HasFlag (NSTipTypes.PolicyTip))
 				{
 				await AndroidSupport.PolicyLoop ();
-				NotificationsSet.TipsState |= NSTipTypes.PolicyTip;
+				NotificationsSupport.TipsState |= NSTipTypes.PolicyTip;
 				}
 
 			// Подсказки
-			if (!NotificationsSet.TipsState.HasFlag (NSTipTypes.StartupTips))
+			if (!NotificationsSupport.TipsState.HasFlag (NSTipTypes.StartupTips))
 				{
 				await AndroidSupport.ShowMessage ("Добро пожаловать в клиент Grammar must joy!" + RDLocale.RNRN +
 					"• На этой странице Вы можете настроить поведение приложения." + RDLocale.RNRN +
@@ -282,7 +298,7 @@ namespace RD_AAOW
 					"если запросы не будут работать правильно",
 					RDLocale.GetDefaultText (RDLDefaultTexts.Button_OK));
 
-				NotificationsSet.TipsState |= NSTipTypes.StartupTips;
+				NotificationsSupport.TipsState |= NSTipTypes.StartupTips;
 				}
 			}
 
@@ -294,30 +310,33 @@ namespace RD_AAOW
 			switch (Type)
 				{
 				case NSTipTypes.GoToButton:
-					msg = "Эта опция позволяет открыть источник выбранного уведомления в браузере";
+					msg = "Эта опция позволяет открыть выбранную запись в Telegram или в браузере";
 					break;
 
-				case NSTipTypes.ShareButton:
-					msg = "Эти опция позволяет поделиться текстом уведомления";
+				case NSTipTypes.ShareTextButton:
+					msg = "Эта опция позволяет поделиться текстом записи";
 					if (GMJ.EnablePostSubscription)
 						msg += ("." + RDLocale.RNRN +
 							"Обратите внимание, что приложение добавляет к текстам, которыми Вы делитесь, " +
-							"ссылки на источники информации (в целях соблюдения прав авторов). Рекомендуется " +
-							"не удалять их при распространении текстов с помощью этой функции");
+							"ссылку на сообщество Grammar must joy");
+					break;
+
+				case NSTipTypes.ShareImageButton:
+					msg = "Эта опция позволяет поделиться записью в виде картинки";
 					break;
 
 				case NSTipTypes.MainLogClickMenuTip:
-					msg = "Все операции с текстами уведомлений доступны по клику на них в главном журнале";
+					msg = "Все операции с текстами записей доступны по клику на них в главном журнале";
 					break;
 
 				case NSTipTypes.KeepScreenOnTip:
 					msg = "Этот переключатель позволяет экрану оставаться активным, пока Вы читаете " +
-						"тексты уведомлений (т. е. пока приложение открыто)";
+						"тексты записей (т. е. пока приложение открыто)";
 					break;
 				}
 
 			await AndroidSupport.ShowMessage (msg, RDLocale.GetDefaultText (RDLDefaultTexts.Button_OK));
-			NotificationsSet.TipsState |= Type;
+			NotificationsSupport.TipsState |= Type;
 			return true;
 			}
 
@@ -448,56 +467,71 @@ namespace RD_AAOW
 				}
 
 			// Формирование меню
-			int variant = 0, menuItem;
-			if (tapMenuItems.Count < 1)
+			const string secondMenuName = "Ещё...";
+			if (tapMenuItems2.Count < 1)
 				{
-				tapMenuItems.Add (new List<string> {
+				tapMenuItems2.Add (new List<string> {
 					"☍\tПоделиться текстом",
 					"❏\tСкопировать текст",
-					"Ещё...",
+					secondMenuName,
 					});
-				tapMenuItems.Add (new List<string> {
+				tapMenuItems2.Add (new List<string> {
 					"▷\tПерейти к источнику",
 					"☍\tПоделиться текстом",
 					"❏\tСкопировать текст",
-					"Ещё...",
+					secondMenuName,
 					});
-				tapMenuItems.Add (new List<string> {
+				tapMenuItems2.Add (new List<string> {
+					"▷\tПерейти к источнику",
+					"☍\tПоделиться текстом",
+					"☻\tПоделиться картинкой",
+					"❏\tСкопировать текст",
+					secondMenuName,
+					});
+				tapMenuItems2.Add (new List<string> {
 					"✕\tУдалить из журнала",
 					});
 				}
 
 			// Запрос варианта использования
-			menuItem = (string.IsNullOrWhiteSpace (notLink) ? 0 : 1);
-			menuItem = await AndroidSupport.ShowList ("Выберите действие:",
+			int menuVariant = 0;
+			if (!string.IsNullOrWhiteSpace (notLink))
+				{
+				menuVariant++;
+				if (GMJPicture.AlignString (notItem.Text) != null)
+					menuVariant++;
+				}
+
+			int menuItem = await AndroidSupport.ShowList ("Выберите действие:",
 				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel),
-				tapMenuItems[menuItem]);
+				tapMenuItems2[menuVariant]);
 
 			if (menuItem < 0)
 				return;
 
-			variant = menuItem + 10;
-			if (string.IsNullOrWhiteSpace (notLink))
-				variant++;
+			bool secondMenu = (tapMenuItems2[menuVariant][menuItem] == secondMenuName);
+			menuVariant = menuItem + 10 * (menuVariant + 1);
 
 			// Контроль второго набора
-			if (variant > 12)
+			if (secondMenu)
 				{
+				menuVariant = 3;
 				menuItem = await AndroidSupport.ShowList ("Выберите действие:",
-					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), tapMenuItems[2]);
+					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), tapMenuItems2[menuVariant]);
 				if (menuItem < 0)
 					return;
 
-				variant += menuItem;
+				/*variant += menuItem;*/
+				menuVariant = menuItem + 10 * (menuVariant + 1);
 				}
 
 			// Обработка (неподходящие варианты будут отброшены)
-			switch (variant)
+			switch (menuVariant)
 				{
 				// Переход по ссылке
-				case 0:
-				case 10:
-					if (!NotificationsSet.TipsState.HasFlag (NSTipTypes.GoToButton))
+				case 20:
+				case 30:
+					if (!NotificationsSupport.TipsState.HasFlag (NSTipTypes.GoToButton))
 						await ShowTips (NSTipTypes.GoToButton);
 
 					try
@@ -512,10 +546,11 @@ namespace RD_AAOW
 					break;
 
 				// Поделиться
-				case 1:
-				case 11:
-					if (!NotificationsSet.TipsState.HasFlag (NSTipTypes.ShareButton))
-						await ShowTips (NSTipTypes.ShareButton);
+				case 10:
+				case 21:
+				case 31:
+					if (!NotificationsSupport.TipsState.HasFlag (NSTipTypes.ShareTextButton))
+						await ShowTips (NSTipTypes.ShareTextButton);
 
 					await Share.RequestAsync ((notItem.Header + RDLocale.RNRN + notItem.Text +
 						(GMJ.EnablePostSubscription ? (RDLocale.RNRN + notLink) : "")).Replace ("\r", ""),
@@ -523,16 +558,43 @@ namespace RD_AAOW
 					break;
 
 				// Скопировать в буфер обмена
-				case 2:
-				case 12:
+				case 11:
+				case 22:
+				case 33:
 					RDGenerics.SendToClipboard ((notItem.Header + RDLocale.RNRN + notItem.Text +
 						(GMJ.EnablePostSubscription ? (RDLocale.RNRN + notLink) : "")).Replace ("\r", ""),
 						true);
 					break;
 
+				// Поделиться картинкой
+				case 32:
+					if (!NotificationsSupport.TipsState.HasFlag (NSTipTypes.ShareImageButton))
+						await ShowTips (NSTipTypes.ShareImageButton);
+
+					if (!flags.HasFlag (RDAppStartupFlags.CanWriteFiles))
+						{
+						if (await AndroidSupport.ShowMessage (
+							RDLocale.GetDefaultText (RDLDefaultTexts.Message_ReadWritePermission) + "." +
+							RDLocale.RNRN + "Перейти к настройкам разрешений приложения?",
+							RDLocale.GetDefaultText (RDLDefaultTexts.Button_Yes),
+							RDLocale.GetDefaultText (RDLDefaultTexts.Button_No)))
+							AndroidSupport.CallAppSettings ();
+						return;
+						}
+
+					var pict = GMJPicture.CreateGMJPicture (notItem.Header, notItem.Text,
+						NotificationsSupport.BackgroundType, pTextOnTheLeftSwitch.IsToggled);
+					if (pict == null)
+						{
+						AndroidSupport.ShowBalloon ("Текст записи не позволяет сформировать картинку", true);
+						return;
+						}
+
+					await GMJPicture.SaveGMJPictureToFile (pict, notItem.Header + ".png");
+					break;
+
 				// Удаление из журнала
-				case 5:
-				case 13:
+				case 40:
 					masterLog.RemoveAt (e.ItemIndex);
 					UpdateLog ();
 					break;
@@ -595,6 +657,7 @@ namespace RD_AAOW
 			AndroidSupport.StopRequested = false; // Разблокировка метода GetHTML
 			string newText = "";
 			uint group = NotificationsSupport.GroupSize;
+			bool success = false;
 
 			for (int i = 0; i < group; i++)
 				{
@@ -617,12 +680,14 @@ namespace RD_AAOW
 					AddTextToLog (newText);
 					needsScroll = true;
 					UpdateLog ();
+					success = true;
 					}
 				}
 
 			// Разблокировка
 			SetLogState (true);
-			if (!NotificationsSet.TipsState.HasFlag (NSTipTypes.MainLogClickMenuTip))
+			UpdateLogButton (!success, !success);
+			if (!NotificationsSupport.TipsState.HasFlag (NSTipTypes.MainLogClickMenuTip))
 				await ShowTips (NSTipTypes.MainLogClickMenuTip);
 			}
 
@@ -689,7 +754,7 @@ namespace RD_AAOW
 		private async void KeepScreenOnSwitch_Toggled (object sender, ToggledEventArgs e)
 			{
 			// Подсказки
-			if (!NotificationsSet.TipsState.HasFlag (NSTipTypes.KeepScreenOnTip))
+			if (!NotificationsSupport.TipsState.HasFlag (NSTipTypes.KeepScreenOnTip))
 				await ShowTips (NSTipTypes.KeepScreenOnTip);
 
 			NotificationsSupport.KeepScreenOn = keepScreenOnSwitch.IsToggled;
@@ -802,6 +867,29 @@ namespace RD_AAOW
 					RDLocale.GetDefaultText (RDLDefaultTexts.Button_OK));
 
 			GMJ.EnablePostSubscription = enablePostSubscriptionSwitch.IsToggled;
+			}
+
+		// Выбор текущей страницы
+		private async void PictureBack_Clicked (object sender, EventArgs e)
+			{
+			// Запрос варианта
+			if (pictureBackVariants.Count < 1)
+				pictureBackVariants.AddRange (GMJPicture.BackgroundNames);
+
+			int res = await AndroidSupport.ShowList (RDLocale.GetDefaultText (RDLDefaultTexts.Button_Select),
+				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), pictureBackVariants);
+			if (res < 0)
+				return;
+
+			// Сохранение
+			NotificationsSupport.BackgroundType = (GMJPictureBackground)res;
+			pictureBackButton.Text = pictureBackVariants[res];
+			}
+
+		// Включение / выключение выравнивания текста картинок по левой стороне
+		private void PTextOnTheLeft_Toggled (object sender, ToggledEventArgs e)
+			{
+			NotificationsSupport.PicturesTextOnTheLeft = pTextOnTheLeftSwitch.IsToggled;
 			}
 
 		#endregion

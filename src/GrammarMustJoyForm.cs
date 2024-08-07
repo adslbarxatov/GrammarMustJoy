@@ -40,11 +40,15 @@ namespace RD_AAOW
 
 			// Получение настроек
 			RDGenerics.LoadWindowDimensions (this);
-			ReadMode.Checked = RDGenerics.GetSettings (readPar, false);
+
+			/*ReadMode.Checked = RDGenerics.Get Settings (readPar, false);*/
+			ReadMode.Checked = NotificationsSupport.LogReadingMode;
 			try
 				{
-				FontSizeField.Value = RDGenerics.GetSettings (fontSizePar, 130) / 10.0m;
-				GroupCountField.Value = RDGenerics.GetSettings (groupCountPar, 1);
+				/*FontSizeField.Value = RDGenerics.Get Settings (fontSizePar, 130) / 10.0m;*/
+				FontSizeField.Value = NotificationsSupport.LogFontSize / 10.0m;
+				/*GroupCountField.Value = RDGenerics.Get Settings (groupCountPar, 1);*/
+				GroupCountField.Value = NotificationsSupport.GroupSize;
 				}
 			catch { }
 
@@ -144,9 +148,10 @@ namespace RD_AAOW
 				}
 
 			// Запоминание
-			RDGenerics.SetSettings (readPar, ReadMode.Checked);
+			/*RDGenerics.Set Settings (readPar, ReadMode.Checked);*/
+			NotificationsSupport.LogReadingMode = ReadMode.Checked;
 			}
-		private const string readPar = "Read";
+		/*private const string readPar = "Read";*/
 
 		// Изменение размера формы
 		private void GrammarMustJoyForm_Resize (object sender, EventArgs e)
@@ -166,7 +171,8 @@ namespace RD_AAOW
 		// Запрос сообщения от GMJ
 		private void GetGMJExecutor (object sender, DoWorkEventArgs e)
 			{
-			uint group = RDGenerics.GetSettings (groupCountPar, 1);
+			/*uint group = RDGenerics.Get Settings (groupCountPar, 1);*/
+			uint group = NotificationsSupport.GroupSize;
 			BackgroundWorker bw = (BackgroundWorker)sender;
 			string res = "";
 			string sp = groupSplitter[0].ToString ();
@@ -201,7 +207,7 @@ namespace RD_AAOW
 				{
 				for (int i = 0; i < values.Length; i++)
 					items += ((empty ? "" : RDLocale.RNRN + RDLocale.RNRN) +
-						values[i].Replace (NotificationsSet.MainLogItemSplitter.ToString (),
+						values[i].Replace (NotificationsSupport.MainLogItemSplitter.ToString (),
 						RDLocale.RN));
 				}
 			else
@@ -227,16 +233,18 @@ namespace RD_AAOW
 		private void FontSizeField_ValueChanged (object sender, EventArgs e)
 			{
 			MainText.Font = new Font (MainText.Font.FontFamily, (float)FontSizeField.Value);
-			RDGenerics.SetSettings (fontSizePar, (uint)(FontSizeField.Value * 10.0m));
+			/*RDGenerics.Set Settings (fontSizePar, (uint)(FontSizeField.Value * 10.0m));*/
+			NotificationsSupport.LogFontSize = (uint)(FontSizeField.Value * 10.0m);
 			}
-		private const string fontSizePar = "FontSize";
+		/*private const string fontSizePar = "FontSize";*/
 
 		// Изменение длины группы
 		private void GroupCountField_ValueChanged (object sender, EventArgs e)
 			{
-			RDGenerics.SetSettings (groupCountPar, (uint)GroupCountField.Value);
+			/*RDGenerics.Set Settings (groupCountPar, (uint)GroupCountField.Value);*/
+			NotificationsSupport.GroupSize = (uint)GroupCountField.Value;
 			}
-		private const string groupCountPar = "GroupCount";
+		/*private const string groupCountPar = "GroupCount";*/
 		private char[] groupSplitter = new char[] { '\x1' };
 
 		// Вызов справки

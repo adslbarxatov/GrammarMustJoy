@@ -14,7 +14,7 @@
 			InitializeComponent ();
 			}
 
-		// Направление повторного вызова на метод Resume в приложении (не работает в MAUI)
+		/*// Направление повторного вызова на метод Resume в приложении (не работает в MAUI)
 		protected override void OnAppearing ()
 			{
 			if (NotificationsSupport.AllowServiceToStart)
@@ -37,6 +37,6 @@
 				appEx = value;
 				}
 			}
-		private static App appEx;
+		private static App appEx;*/
 		}
 	}
