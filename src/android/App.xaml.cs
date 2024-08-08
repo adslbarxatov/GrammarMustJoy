@@ -51,15 +51,19 @@ namespace RD_AAOW
 		private Label aboutLabel, fontSizeFieldLabel, groupSizeFieldLabel, aboutFontSizeField;
 
 		private Switch nightModeSwitch, newsAtTheEndSwitch, keepScreenOnSwitch,
-			enablePostSubscriptionSwitch, pTextOnTheLeftSwitch;
+			enablePostSubscriptionSwitch;
 
 		private Button centerButton, scrollUpButton, scrollDownButton, menuButton, addButton,
-			pictureBackButton;
+			pictureBackButton, pTextOnTheLeftButton, censorshipButton;
 
 		private ListView mainLog;
 
 		private List<string> pageVariants = new List<string> ();
-		private List<string> pictureBackVariants = new List<string> ();
+		private List<string> pictureBKVariants = new List<string> ();
+		private List<string> pictureBKSelectionVariants = new List<string> ();
+		private List<string> pictureTAVariants = new List<string> ();
+		private List<string> pictureTASelectionVariants = new List<string> ();
+		private List<string> censorshipVariants = new List<string> ();
 
 		#endregion
 
@@ -79,7 +83,6 @@ namespace RD_AAOW
 
 			// Общая конструкция страниц приложения
 			MainPage = new MasterPage ();
-			/*MasterPage.AppEx = this;*/
 
 			settingsPage = AndroidSupport.ApplyPageSettings (new SettingsPage (), "SettingsPage",
 				"Настройки приложения", settingsMasterBackColor);
@@ -102,12 +105,18 @@ namespace RD_AAOW
 			keepScreenOnSwitch = AndroidSupport.ApplySwitchSettings (settingsPage, "KeepScreenOnSwitch",
 				false, settingsFieldBackColor, KeepScreenOnSwitch_Toggled, NotificationsSupport.KeepScreenOn);
 
-			AndroidSupport.ApplyLabelSettings (settingsPage, "EnablePostSubscriptionLabel",
+			Label eps = AndroidSupport.ApplyLabelSettings (settingsPage, "EnablePostSubscriptionLabel",
 				"Добавлять ссылку на оригинал\nзаписи к тексту при действиях\n«Скопировать» и «Поделиться»",
 				RDLabelTypes.DefaultLeft);
 			enablePostSubscriptionSwitch = AndroidSupport.ApplySwitchSettings (settingsPage,
 				"EnablePostSubscriptionSwitch", false, settingsFieldBackColor,
 				EnablePostSubscription_Toggled, GMJ.EnablePostSubscription);
+
+			if (AndroidSupport.IsTV)
+				{
+				GMJ.EnablePostSubscription = false;
+				eps.IsVisible = enablePostSubscriptionSwitch.IsVisible = false;
+				}
 
 			#region Страница "О программе"
 
@@ -117,9 +126,15 @@ namespace RD_AAOW
 			AndroidSupport.ApplyButtonSettings (aboutPage, "ManualsButton",
 				RDLocale.GetDefaultText (RDLDefaultTexts.Control_ReferenceMaterials),
 				aboutFieldBackColor, ReferenceButton_Click, false);
-			AndroidSupport.ApplyButtonSettings (aboutPage, "HelpButton",
+
+			Button hlp = AndroidSupport.ApplyButtonSettings (aboutPage, "HelpButton",
 				RDLocale.GetDefaultText (RDLDefaultTexts.Control_HelpSupport),
 				aboutFieldBackColor, HelpButton_Click, false);
+			hlp.IsVisible = !AndroidSupport.IsTV;
+
+			Image qrImage = (Image)aboutPage.FindByName ("QRImage");
+			qrImage.IsVisible = AndroidSupport.IsTV;
+
 			AndroidSupport.ApplyLabelSettings (aboutPage, "GenericSettingsLabel",
 				RDLocale.GetDefaultText (RDLDefaultTexts.Control_GenericSettings),
 				RDLabelTypes.HeaderLeft);
@@ -160,6 +175,12 @@ namespace RD_AAOW
 			mainLog.ItemAppearing += MainLog_ItemAppearing;
 			AndroidSupport.MasterPage.Popped += CurrentPageChanged;
 
+			if (AndroidSupport.IsTV)
+				{
+				mainLog.VerticalScrollBarVisibility = ScrollBarVisibility.Always;
+				mainLog.SelectionMode = ListViewSelectionMode.Single;
+				}
+
 			centerButton = AndroidSupport.ApplyButtonSettings (logPage, "CenterButton", " ",
 				logFieldBackColor, CenterButton_Click, false);
 			centerButton.FontSize += 6;
@@ -185,6 +206,7 @@ namespace RD_AAOW
 				RDDefaultButtons.Menu, logFieldBackColor, SelectPage);
 			addButton = AndroidSupport.ApplyButtonSettings (logPage, "AddButton",
 				RDDefaultButtons.Increase, logFieldBackColor, OfferTheRecord);
+			addButton.IsVisible = !AndroidSupport.IsTV;
 
 			AndroidSupport.ApplyLabelSettings (settingsPage, "LogSettingsLabel",
 				"Главный журнал", RDLabelTypes.HeaderLeft);
@@ -216,20 +238,37 @@ namespace RD_AAOW
 
 			GroupSizeChanged (null, null);
 
+			AndroidSupport.ApplyLabelSettings (settingsPage, "CensorshipLabel",
+				"Цензурирование:", RDLabelTypes.DefaultLeft);
+			censorshipButton = AndroidSupport.ApplyButtonSettings (settingsPage, "CensorshipButton",
+				" ", settingsFieldBackColor, Censorship_Clicked, false);
+
+			Censorship_Clicked (null, null);
+
 			// Настройки картинок
-			AndroidSupport.ApplyLabelSettings (settingsPage, "PicturesLabel",
-				"Картинки", RDLabelTypes.HeaderLeft);
+			Label pictLabel = AndroidSupport.ApplyLabelSettings (settingsPage, "PicturesLabel",
+				"Изображения", RDLabelTypes.HeaderLeft);
 
-			AndroidSupport.ApplyLabelSettings (settingsPage, "PicturesBackLabel",
-				"Фон картинок:", RDLabelTypes.DefaultLeft);
+			Label pictBackLabel = AndroidSupport.ApplyLabelSettings (settingsPage, "PicturesBackLabel",
+				"Фон:", RDLabelTypes.DefaultLeft);
 			pictureBackButton = AndroidSupport.ApplyButtonSettings (settingsPage, "PicturesBackButton",
-				GMJPicture.BackgroundNames[(int)NotificationsSupport.BackgroundType], settingsFieldBackColor,
-				PictureBack_Clicked, false);
+				" ", settingsFieldBackColor, PictureBack_Clicked, false);
 
-			AndroidSupport.ApplyLabelSettings (settingsPage, "PTextLeftLabel",
-				"Выровнять текст по левой стороне", RDLabelTypes.DefaultLeft);
-			pTextOnTheLeftSwitch = AndroidSupport.ApplySwitchSettings (settingsPage, "PTextLeftSwitch",
-				false, settingsFieldBackColor, PTextOnTheLeft_Toggled, NotificationsSupport.PicturesTextOnTheLeft);
+			Label pictTextLabel = AndroidSupport.ApplyLabelSettings (settingsPage, "PTextLeftLabel",
+				"Текст:", RDLabelTypes.DefaultLeft);
+			pTextOnTheLeftButton = AndroidSupport.ApplyButtonSettings (settingsPage, "PTextLeftButton",
+				" ", settingsFieldBackColor, PTextOnTheLeft_Toggled, false);
+
+			if (AndroidSupport.IsTV)
+				{
+				pictLabel.IsVisible = pictBackLabel.IsVisible = pictureBackButton.IsVisible =
+					pictTextLabel.IsVisible = pTextOnTheLeftButton.IsVisible = false;
+				}
+			else
+				{
+				PictureBack_Clicked (null, null);
+				PTextOnTheLeft_Toggled (null, null);
+				}
 
 			// Запуск цикла обратной связи (без ожидания)
 			FinishBackgroundRequest ();
@@ -278,25 +317,38 @@ namespace RD_AAOW
 			// Требование принятия Политики
 			if (!NotificationsSupport.TipsState.HasFlag (NSTipTypes.PolicyTip))
 				{
-				await AndroidSupport.PolicyLoop ();
+				if (!AndroidSupport.IsTV)
+					await AndroidSupport.PolicyLoop ();
 				NotificationsSupport.TipsState |= NSTipTypes.PolicyTip;
 				}
 
 			// Подсказки
 			if (!NotificationsSupport.TipsState.HasFlag (NSTipTypes.StartupTips))
 				{
-				await AndroidSupport.ShowMessage ("Добро пожаловать в клиент Grammar must joy!" + RDLocale.RNRN +
+				await AndroidSupport.ShowMessage ("Добро пожаловать в мини-клиент Grammar must joy!" + RDLocale.RNRN +
 					"• На этой странице Вы можете настроить поведение приложения." + RDLocale.RNRN +
 					"• Используйте системную кнопку «Назад», чтобы вернуться к журналу записей " +
 					"из любого раздела." + RDLocale.RNRN +
 					"• Используйте кнопку с семафором для получения случайных записей из сообщества GMJ",
 					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Next));
 
-				await AndroidSupport.ShowMessage ("Внимание!" + RDLocale.RNRN +
-					"• Некоторые устройства требуют ручного разрешения на доступ в интернет " +
-					"(например, если активен режим экономии интернет-трафика). Проверьте его, " +
-					"если запросы не будут работать правильно",
-					RDLocale.GetDefaultText (RDLDefaultTexts.Button_OK));
+				if (AndroidSupport.IsTV)
+					{
+					await AndroidSupport.ShowMessage ("Внимание!" + RDLocale.RNRN +
+						"• Убедитесь, что данное устройство имеет выход в интернет. Без него " +
+						"приложение не сможет продолжить работу." + RDLocale.RNRN +
+						"• Ознакомьтесь с описанием проекта в разделе «О приложении» (кнопка ≡). Убедитесь, " +
+						"что Вы согласны с Политикой сообщества и Политикой разработки продукта",
+						RDLocale.GetDefaultText (RDLDefaultTexts.Button_OK));
+					}
+				else
+					{
+					await AndroidSupport.ShowMessage ("Внимание!" + RDLocale.RNRN +
+						"Некоторые устройства требуют ручного разрешения на доступ в интернет " +
+						"(например, если активен режим экономии интернет-трафика). Проверьте его, " +
+						"если запросы не будут работать правильно",
+						RDLocale.GetDefaultText (RDLDefaultTexts.Button_OK));
+					}
 
 				NotificationsSupport.TipsState |= NSTipTypes.StartupTips;
 				}
@@ -401,16 +453,19 @@ namespace RD_AAOW
 			await Task.Delay (100);
 
 			// Промотка с повторением до достижения нужного участка
+			if (VisibleItem < 0)
+				needsScroll = false;
+
 			if (ToTheEnd)
 				{
-				if ((VisibleItem < 0) || (VisibleItem > masterLog.Count - 3))
+				if (VisibleItem > masterLog.Count - 3)
 					needsScroll = false;
 
 				mainLog.ScrollTo (masterLog[masterLog.Count - 1], ScrollToPosition.MakeVisible, false);
 				}
 			else
 				{
-				if ((VisibleItem < 0) || (VisibleItem < 2))
+				if (VisibleItem < 2)
 					needsScroll = false;
 
 				mainLog.ScrollTo (masterLog[0], ScrollToPosition.MakeVisible, false);
@@ -443,12 +498,18 @@ namespace RD_AAOW
 				{
 				centerButton.Text = "   ";
 				}
+
+			if (AndroidSupport.IsTV)
+				centerButton.Focus ();
 			}
 
 		// Выбор оповещения для перехода или share
 		private async void MainLog_ItemTapped (object sender, ItemTappedEventArgs e)
 			{
 			// Контроль
+			if (AndroidSupport.IsTV)
+				return;
+
 			MainLogItem notItem = (MainLogItem)e.Item;
 			if (!centerButtonEnabled || (notItem.StringForSaving == ""))  // Признак разделителя
 				return;
@@ -582,8 +643,29 @@ namespace RD_AAOW
 						return;
 						}
 
-					var pict = GMJPicture.CreateGMJPicture (notItem.Header, notItem.Text,
-						NotificationsSupport.BackgroundType, pTextOnTheLeftSwitch.IsToggled);
+					GMJPictureTextAlignment pta = NotificationsSupport.PicturesTextAlignment;
+					if (pta == GMJPictureTextAlignment.AskUser)
+						{
+						int res = await AndroidSupport.ShowList ("Выровнять текст:",
+							RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), pictureTASelectionVariants);
+						if (res < 0)
+							return;
+
+						pta = (GMJPictureTextAlignment)res;
+						}
+
+					GMJPictureBackground pbk = NotificationsSupport.PicturesBackgroundType;
+					if (pbk == GMJPictureBackground.AskUser)
+						{
+						int res = await AndroidSupport.ShowList ("Использовать фон:",
+							RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), pictureBKSelectionVariants);
+						if (res < 0)
+							return;
+
+						pbk = (GMJPictureBackground)(res + 2);
+						}
+
+					var pict = GMJPicture.CreateGMJPicture (notItem.Header, notItem.Text, pta, pbk);
 					if (pict == null)
 						{
 						AndroidSupport.ShowBalloon ("Текст записи не позволяет сформировать картинку", true);
@@ -608,7 +690,8 @@ namespace RD_AAOW
 			{
 			// Переключение состояния кнопок и свичей
 			centerButtonEnabled = State;
-			menuButton.IsVisible = addButton.IsVisible = State;
+			menuButton.IsVisible = State;
+			addButton.IsVisible = State && !AndroidSupport.IsTV;
 
 			// Обновление статуса
 			UpdateLogButton (!State, false);
@@ -869,27 +952,111 @@ namespace RD_AAOW
 			GMJ.EnablePostSubscription = enablePostSubscriptionSwitch.IsToggled;
 			}
 
-		// Выбор текущей страницы
+		// Выбор фона картинок
 		private async void PictureBack_Clicked (object sender, EventArgs e)
 			{
 			// Запрос варианта
-			if (pictureBackVariants.Count < 1)
-				pictureBackVariants.AddRange (GMJPicture.BackgroundNames);
+			if (pictureBKVariants.Count < 1)
+				{
+				pictureBKVariants.Add ("(спрашивать)");
+				pictureBKVariants.Add ("(случайный)");
+				pictureBKVariants.AddRange (GMJPicture.BackgroundNames);
+				pictureBKSelectionVariants.AddRange (GMJPicture.BackgroundNames);
+				}
 
-			int res = await AndroidSupport.ShowList (RDLocale.GetDefaultText (RDLDefaultTexts.Button_Select),
-				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), pictureBackVariants);
+			int res;
+			if (sender == null)
+				{
+				res = (int)NotificationsSupport.PicturesBackgroundType;
+				}
+			else
+				{
+				res = await AndroidSupport.ShowList ("Фон картинок",
+				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), pictureBKVariants);
+				if (res < 0)
+					return;
+
+				NotificationsSupport.PicturesBackgroundType = (GMJPictureBackground)res;
+				}
+
+			pictureBackButton.Text = pictureBKVariants[res];
+			}
+
+		// Выбор режима выравнивания текста картинок
+		private async void PTextOnTheLeft_Toggled (object sender, EventArgs e)
+			{
+			// Запрос варианта
+			if (pictureTAVariants.Count < 1)
+				{
+				pictureTAVariants = new List<string> {
+					"Всегда по центру",
+					"Всегда по левой стороне",
+					"Диалоги по левой стороне",
+					"Запрашивать выравнивание",
+					};
+				pictureTASelectionVariants = new List<string> {
+					"По центру",
+					"По левой стороне",
+					};
+				}
+
+			int res;
+			if (sender == null)
+				{
+				res = (int)NotificationsSupport.PicturesTextAlignment;
+				}
+			else
+				{
+				res = await AndroidSupport.ShowList ("Выравнивание текста",
+					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), pictureTAVariants);
+				if (res < 0)
+					return;
+
+				NotificationsSupport.PicturesTextAlignment = (GMJPictureTextAlignment)res;
+				if (NotificationsSupport.PicturesTextAlignment == GMJPictureTextAlignment.BasedOnDialogues)
+					await AndroidSupport.ShowMessage ("Этот вариант предполагает, что тексты, содержащие диалоги, " +
+						"будут выравниваться по левой стороне, а остальные – по центру",
+						RDLocale.GetDefaultText (RDLDefaultTexts.Button_OK));
+				}
+
+			// Сохранение
+			pTextOnTheLeftButton.Text = pictureTAVariants[res];
+			}
+
+		// Выбор режима цензурирования
+		private async void Censorship_Clicked (object sender, EventArgs e)
+			{
+			// Запрос варианта
+			if (censorshipVariants.Count < 1)
+				{
+				censorshipVariants = new List<string> {
+					"Отключено",
+					"Действует",
+					};
+				}
+
+			int res;
+			if (sender == null)
+				{
+				res = GMJ.EnableCensorship ? 1 : 0;
+				censorshipButton.Text = censorshipVariants[res];
+				return;
+				}
+
+			res = await AndroidSupport.ShowList ("Цензурирование",
+				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), censorshipVariants);
 			if (res < 0)
 				return;
 
-			// Сохранение
-			NotificationsSupport.BackgroundType = (GMJPictureBackground)res;
-			pictureBackButton.Text = pictureBackVariants[res];
-			}
-
-		// Включение / выключение выравнивания текста картинок по левой стороне
-		private void PTextOnTheLeft_Toggled (object sender, ToggledEventArgs e)
-			{
-			NotificationsSupport.PicturesTextOnTheLeft = pTextOnTheLeftSwitch.IsToggled;
+			// Контроль
+			string msg = (res > 0) ? GMJ.CensorshipEnableMessage : GMJ.CensorshipDisableMessage;
+			if (await AndroidSupport.ShowMessage (msg, RDLocale.GetDefaultText (RDLDefaultTexts.Button_Yes),
+				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel)))
+				{
+				GMJ.EnableCensorship = (res > 0);
+				censorshipButton.Text = censorshipVariants[res];
+				GMJ.ResetFreeSet ();
+				}
 			}
 
 		#endregion
@@ -899,6 +1066,15 @@ namespace RD_AAOW
 		// Вызов справочных материалов
 		private async void ReferenceButton_Click (object sender, EventArgs e)
 			{
+			if (AndroidSupport.IsTV)
+				{
+				await AndroidSupport.ShowMessage ("Для доступа к помощи, поддержке и справочным материалам " +
+					"воспользуйтесь QR-кодом, представленным ниже." + RDLocale.RNRN +
+					"Далее на этой странице доступно сокращённое описание приложения",
+					RDLocale.GetDefaultText (RDLDefaultTexts.Button_OK));
+				return;
+				}
+
 			await AndroidSupport.CallHelpMaterials (RDHelpMaterials.ReferenceMaterials);
 			}
 

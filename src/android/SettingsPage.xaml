@@ -49,6 +49,11 @@
 				<Button x:Name="FontSizeDecButton" HorizontalOptions="Start" />
 			</StackLayout>
 
+			<StackLayout Orientation="Horizontal">
+				<Label x:Name="CensorshipLabel" VerticalOptions="Center" />
+				<Button x:Name="CensorshipButton" VerticalOptions="Center" />
+			</StackLayout>
+
 			<!-- Настройки изображений -->
 			<BoxView VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="1" 
 					WidthRequest="200" Color="#505050" Margin="12" />
@@ -61,8 +66,8 @@
 			</StackLayout>
 
 			<StackLayout Orientation="Horizontal">
-				<Switch x:Name="PTextLeftSwitch" VerticalOptions="Center" />
-				<Label x:Name="PTextLeftLabel" VerticalTextAlignment="Center" />
+				<Label x:Name="PTextLeftLabel" VerticalOptions="Center" />
+				<Button x:Name="PTextLeftButton" VerticalOptions="Center" />
 			</StackLayout>
 
 			<Label />

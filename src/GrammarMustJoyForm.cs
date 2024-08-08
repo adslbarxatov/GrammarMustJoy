@@ -65,6 +65,21 @@ namespace RD_AAOW
 
 			ni.MouseDown += ShowHideFullText;
 			ni.ContextMenu.MenuItems[1].DefaultItem = true;
+
+			// Цензурирование
+			if (RDGenerics.StartedFromMSStore)
+				{
+				CensorshipFlag.Visible = false;
+				if (!GMJ.EnableCensorship)
+					GMJ.EnableCensorship = true;
+				}
+			else
+				{
+				csReverse = true;
+				CensorshipFlag.Checked = GMJ.EnableCensorship;
+				csReverse = false;
+				CensorshipFlag_CheckedChanged (null, null);
+				}
 			}
 
 		private void GrammarMustJoyForm_Shown (object sender, EventArgs e)
@@ -263,5 +278,34 @@ namespace RD_AAOW
 
 			AboutForm.AskDeveloper ();
 			}
+
+		// Изменение режима цензурирования
+		private void CensorshipFlag_CheckedChanged (object sender, EventArgs e)
+			{
+			// Внешняя часть
+			CensorshipFlag.BackColor = RDGenerics.GetInterfaceColor (CensorshipFlag.Checked ?
+				RDInterfaceColors.SuccessMessage : RDInterfaceColors.ErrorMessage);
+
+			// Защита от множественного входа
+			if ((sender == null) || csReverse)
+				return;
+
+			// Внутренняя часть
+			if (RDGenerics.MessageBox (RDMessageTypes.Warning_Left,
+				CensorshipFlag.Checked ? GMJ.CensorshipEnableMessage : GMJ.CensorshipDisableMessage,
+				RDLocale.GetDefaultText (RDLDefaultTexts.Button_YesNoFocus),
+				RDLocale.GetDefaultText (RDLDefaultTexts.Button_No)) == RDMessageButtons.ButtonOne)
+				{
+				GMJ.EnableCensorship = CensorshipFlag.Checked;
+				GMJ.ResetFreeSet ();
+				}
+			else
+				{
+				csReverse = true;
+				CensorshipFlag.Checked = GMJ.EnableCensorship;
+				csReverse = false;
+				}
+			}
+		private bool csReverse = false;
 		}
 	}

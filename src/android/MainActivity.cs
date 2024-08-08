@@ -13,6 +13,7 @@ namespace RD_AAOW
 		Icon = "@drawable/launcher_foreground",
 		Theme = "@style/SplashTheme",
 		MainLauncher = true,
+		Name = "com.RD_AAOW.MainActivity",
 		ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
 	public class MainActivity: MauiAppCompatActivity
 		{
@@ -56,7 +57,7 @@ namespace RD_AAOW
 			}
 		}
 
-	/// <summary>
+	/*/// <summary>
 	/// Класс описывает загрузчик приложения
 	/// </summary>
 	[Activity (Label = "Grammar must joy for TV",
@@ -103,5 +104,5 @@ namespace RD_AAOW
 			// Инициализация и запуск
 			base.OnCreate (savedInstanceState);
 			}
-		}
+		}*/
 	}

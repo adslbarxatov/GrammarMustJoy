@@ -12,6 +12,7 @@
 
 			<Button x:Name="ManualsButton" HorizontalOptions="Center" />
 			<Button x:Name="HelpButton" HorizontalOptions="Center" />
+			<Image x:Name="QRImage" HorizontalOptions="Center" Source="@drawable/qr" MaximumWidthRequest="200" />
 
 			<BoxView VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="1" 
 					WidthRequest="200" Color="#606060" Margin="9" />
