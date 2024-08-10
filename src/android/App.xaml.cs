@@ -21,8 +21,18 @@ namespace RD_AAOW
 		private const string semaphoreOn = "●";
 		private const string semaphoreOff = "○";
 
-		// Флаг завершения прокрутки журнала
+		// Параметры прокрутки журнала
 		private bool needsScroll = true;
+		private ScrollToPosition currentScrollPosition;
+		private int currentScrollItem;
+
+		private const int autoScrollMode = -1;
+		private const int manualScrollMode = -2;
+
+		private const ScrollToPosition scrollStart = ScrollToPosition.End;
+		private const ScrollToPosition scrollMid = ScrollToPosition.Center;
+		private const ScrollToPosition scrollEnd = ScrollToPosition.Start;
+		private const ScrollToPosition scrollFocus = ScrollToPosition.MakeVisible;
 
 		// Сформированные контекстные меню
 		private List<List<string>> tapMenuItems2 = new List<List<string>> ();
@@ -173,13 +183,8 @@ namespace RD_AAOW
 			mainLog.SelectionMode = ListViewSelectionMode.None;
 			mainLog.SeparatorVisibility = SeparatorVisibility.None;
 			mainLog.ItemAppearing += MainLog_ItemAppearing;
-			AndroidSupport.MasterPage.Popped += CurrentPageChanged;
 
-			if (AndroidSupport.IsTV)
-				{
-				mainLog.VerticalScrollBarVisibility = ScrollBarVisibility.Always;
-				mainLog.SelectionMode = ListViewSelectionMode.Single;
-				}
+			AndroidSupport.MasterPage.Popped += CurrentPageChanged;
 
 			centerButton = AndroidSupport.ApplyButtonSettings (logPage, "CenterButton", " ",
 				logFieldBackColor, CenterButton_Click, false);
@@ -284,7 +289,7 @@ namespace RD_AAOW
 				return;
 
 			needsScroll = true;
-			await ScrollMainLog (newsAtTheEndSwitch.IsToggled, -1);
+			await ScrollMainLog (newsAtTheEndSwitch.IsToggled, autoScrollMode);
 			}
 
 		// Цикл обратной связи для загрузки текущего журнала, если фоновая служба не успела завершить работу
@@ -453,24 +458,99 @@ namespace RD_AAOW
 			await Task.Delay (100);
 
 			// Промотка с повторением до достижения нужного участка
-			if (VisibleItem < 0)
+			if (VisibleItem <= autoScrollMode)
 				needsScroll = false;
+
+			// Определение варианта промотки
+			if (VisibleItem > manualScrollMode)
+				{
+				currentScrollPosition = scrollFocus;
+				currentScrollItem = ToTheEnd ? (masterLog.Count - 1) : 0;
+				}
+			else
+				{
+				switch (currentScrollPosition)
+					{
+					case scrollFocus:
+					case scrollStart:
+					case scrollMid:
+						if (ToTheEnd)
+							{
+							if (currentScrollPosition == scrollMid)
+								currentScrollPosition = scrollEnd;
+							else
+								currentScrollPosition = scrollMid;
+							}
+						else
+							{
+							if (currentScrollItem > 0)
+								{
+								currentScrollItem--;
+								currentScrollPosition = scrollEnd;
+								}
+							else
+								{
+								currentScrollPosition = scrollStart;
+								}
+							}
+						break;
+
+					/*case scrollMid:
+						if (ToTheEnd)
+							{
+							currentScrollPosition = scrollEnd;
+							}
+						else
+							{
+							if (currentScrollItem > 0)
+								{
+								currentScrollItem--;
+								currentScrollPosition = scrollEnd;
+								}
+							else
+								{
+								currentScrollPosition = scrollStart;
+								}
+							}
+						break;*/
+
+					case scrollEnd:
+						if (ToTheEnd)
+							{
+							if (currentScrollItem < masterLog.Count - 1)
+								{
+								currentScrollItem++;
+								currentScrollPosition = scrollMid;
+								}
+							else
+								{
+								currentScrollPosition = scrollEnd;
+								}
+							}
+						else
+							{
+							currentScrollPosition = scrollMid;
+							}
+						break;
+					}
+				}
 
 			if (ToTheEnd)
 				{
 				if (VisibleItem > masterLog.Count - 3)
 					needsScroll = false;
-
-				mainLog.ScrollTo (masterLog[masterLog.Count - 1], ScrollToPosition.MakeVisible, false);
 				}
 			else
 				{
 				if (VisibleItem < 2)
 					needsScroll = false;
-
-				mainLog.ScrollTo (masterLog[0], ScrollToPosition.MakeVisible, false);
 				}
 
+			try
+				{
+				mainLog.ScrollTo (masterLog[currentScrollItem], currentScrollPosition, VisibleItem <= manualScrollMode);
+				}
+			catch { }
 			return true;
 			}
 
@@ -499,8 +579,8 @@ namespace RD_AAOW
 				centerButton.Text = "   ";
 				}
 
-			if (AndroidSupport.IsTV)
-				centerButton.Focus ();
+			/*if (AndroidSupport.IsTV)
+				centerButton.Focus ();*/
 			}
 
 		// Выбор оповещения для перехода или share
@@ -778,13 +858,13 @@ namespace RD_AAOW
 		private async void ScrollUpButton_Click (object sender, EventArgs e)
 			{
 			needsScroll = true;
-			await ScrollMainLog (false, -1);
+			await ScrollMainLog (false, manualScrollMode);
 			}
 
 		private async void ScrollDownButton_Click (object sender, EventArgs e)
 			{
 			needsScroll = true;
-			await ScrollMainLog (true, -1);
+			await ScrollMainLog (true, manualScrollMode);
 			}
 
 		// Выбор текущей страницы
@@ -1049,12 +1129,20 @@ namespace RD_AAOW
 				return;
 
 			// Контроль
-			string msg = (res > 0) ? GMJ.CensorshipEnableMessage : GMJ.CensorshipDisableMessage;
+			string msg = (res > 0) ? GMJ.CensorshipEnableMessage2 : GMJ.CensorshipDisableMessage2;
+			bool doReset = false;
 			if (await AndroidSupport.ShowMessage (msg, RDLocale.GetDefaultText (RDLDefaultTexts.Button_Yes),
 				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel)))
 				{
 				GMJ.EnableCensorship = (res > 0);
 				censorshipButton.Text = censorshipVariants[res];
+				doReset = true;
+				}
+
+			msg = (res > 0) ? GMJ.CensorshipEnableResetMessage : GMJ.CensorshipDisableResetMessage;
+			if (doReset && await AndroidSupport.ShowMessage (msg, RDLocale.GetDefaultText (RDLDefaultTexts.Button_Yes),
+				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel)))
+				{
 				GMJ.ResetFreeSet ();
 				}
 			}

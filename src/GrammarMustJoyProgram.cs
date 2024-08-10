@@ -35,19 +35,6 @@ namespace RD_AAOW
 				return;
 			RDGenerics.ShowAbout (true);
 
-			/*Bitmap b = GMJPicture.CreateGMJPicture ("- Telegram > Grammar must joy • №4142–1957 -",
-				"— Хочу футболку с QR-кодом какого-нибудь жуткого вредоносного вируса. Чтобы при попытке сфотографировать меня в публичном месте телефон автоматически сканировал код и превращался в бесполезный кирпич.\n\n"+
-				"— Медуза Горгона, версия для зумеров");
-			if (b == null)
-				{
-				RDGenerics.MessageBox (RDMessageTypes.Warning_Center, "Текст слишком длинный", 2000);
-				return;
-				}
-
-			b.Save ("C:\\Test.png", ImageFormat.Png);
-			RDGenerics.RunURL ("C:\\Test.png");
-			return;*/
-
 			// Запуск
 			Application.Run (new GrammarMustJoyForm ((args.Length > 0) && (args[0] == "-h")));
 			}

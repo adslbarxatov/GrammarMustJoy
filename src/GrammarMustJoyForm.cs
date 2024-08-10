@@ -16,6 +16,9 @@ namespace RD_AAOW
 		private bool allowExit = false;
 		private bool hideWindow;
 
+		private char[] groupSplitter = new char[] { '\x1' };
+		private bool csReverse = false;	// Отмена повторной обработки изменения режима цензурирования
+
 		/// <summary>
 		/// Конструктор. Настраивает главную форму приложения
 		/// </summary>
@@ -41,13 +44,10 @@ namespace RD_AAOW
 			// Получение настроек
 			RDGenerics.LoadWindowDimensions (this);
 
-			/*ReadMode.Checked = RDGenerics.Get Settings (readPar, false);*/
 			ReadMode.Checked = NotificationsSupport.LogReadingMode;
 			try
 				{
-				/*FontSizeField.Value = RDGenerics.Get Settings (fontSizePar, 130) / 10.0m;*/
 				FontSizeField.Value = NotificationsSupport.LogFontSize / 10.0m;
-				/*GroupCountField.Value = RDGenerics.Get Settings (groupCountPar, 1);*/
 				GroupCountField.Value = NotificationsSupport.GroupSize;
 				}
 			catch { }
@@ -163,10 +163,8 @@ namespace RD_AAOW
 				}
 
 			// Запоминание
-			/*RDGenerics.Set Settings (readPar, ReadMode.Checked);*/
 			NotificationsSupport.LogReadingMode = ReadMode.Checked;
 			}
-		/*private const string readPar = "Read";*/
 
 		// Изменение размера формы
 		private void GrammarMustJoyForm_Resize (object sender, EventArgs e)
@@ -186,7 +184,6 @@ namespace RD_AAOW
 		// Запрос сообщения от GMJ
 		private void GetGMJExecutor (object sender, DoWorkEventArgs e)
 			{
-			/*uint group = RDGenerics.Get Settings (groupCountPar, 1);*/
 			uint group = NotificationsSupport.GroupSize;
 			BackgroundWorker bw = (BackgroundWorker)sender;
 			string res = "";
@@ -235,12 +232,7 @@ namespace RD_AAOW
 			if ((MainText.Text.Length + items.Length > ProgramDescription.MasterLogMaxLength) &&
 				(MainText.Text.Length > items.Length))   // Бывает и так
 				MainText.Text = MainText.Text.Substring (items.Length, MainText.Text.Length - items.Length);
-			/*if (MainText.Text.Length > 0)
-				MainText.AppendText (RDLocale.RNRN + RDLocale.RN);
 
-			// Добавление и форматирование
-			MainText.AppendText (item.Replace (NotificationsSet.MainLogItemSplitter.ToString (), RDLocale.RN));
-			MainText.AppendText (RDLocale.RN);*/
 			MainText.AppendText (items);
 			}
 
@@ -248,19 +240,14 @@ namespace RD_AAOW
 		private void FontSizeField_ValueChanged (object sender, EventArgs e)
 			{
 			MainText.Font = new Font (MainText.Font.FontFamily, (float)FontSizeField.Value);
-			/*RDGenerics.Set Settings (fontSizePar, (uint)(FontSizeField.Value * 10.0m));*/
 			NotificationsSupport.LogFontSize = (uint)(FontSizeField.Value * 10.0m);
 			}
-		/*private const string fontSizePar = "FontSize";*/
 
 		// Изменение длины группы
 		private void GroupCountField_ValueChanged (object sender, EventArgs e)
 			{
-			/*RDGenerics.Set Settings (groupCountPar, (uint)GroupCountField.Value);*/
 			NotificationsSupport.GroupSize = (uint)GroupCountField.Value;
 			}
-		/*private const string groupCountPar = "GroupCount";*/
-		private char[] groupSplitter = new char[] { '\x1' };
 
 		// Вызов справки
 		private void BHelp_Click (object sender, EventArgs e)
@@ -291,21 +278,28 @@ namespace RD_AAOW
 				return;
 
 			// Внутренняя часть
-			if (RDGenerics.MessageBox (RDMessageTypes.Warning_Left,
-				CensorshipFlag.Checked ? GMJ.CensorshipEnableMessage : GMJ.CensorshipDisableMessage,
+			string msg = CensorshipFlag.Checked ? GMJ.CensorshipEnableMessage2 : GMJ.CensorshipDisableMessage2;
+			if (RDGenerics.MessageBox (RDMessageTypes.Warning_Left, msg,
 				RDLocale.GetDefaultText (RDLDefaultTexts.Button_YesNoFocus),
 				RDLocale.GetDefaultText (RDLDefaultTexts.Button_No)) == RDMessageButtons.ButtonOne)
 				{
 				GMJ.EnableCensorship = CensorshipFlag.Checked;
-				GMJ.ResetFreeSet ();
 				}
 			else
 				{
 				csReverse = true;
 				CensorshipFlag.Checked = GMJ.EnableCensorship;
 				csReverse = false;
+				return;
+				}
+
+			msg = CensorshipFlag.Checked ? GMJ.CensorshipEnableResetMessage : GMJ.CensorshipDisableResetMessage;
+			if (RDGenerics.MessageBox (RDMessageTypes.Warning_Left, msg,
+				RDLocale.GetDefaultText (RDLDefaultTexts.Button_YesNoFocus),
+				RDLocale.GetDefaultText (RDLDefaultTexts.Button_No)) == RDMessageButtons.ButtonOne)
+				{
+				GMJ.ResetFreeSet ();
 				}
 			}
-		private bool csReverse = false;
 		}
 	}

@@ -20,9 +20,11 @@
 				<ColumnDefinition Width="60" />
 			</Grid.ColumnDefinitions>
 
+			<!-- Принудительная фокусировка на центральной кнопке -->
+			<Button x:Name="CenterButton" VerticalOptions="Center" HorizontalOptions="Fill" Grid.Column="2" />
+
 			<Button x:Name="AddButton" VerticalOptions="Center" HorizontalOptions="Center" Grid.Column="0" />
 			<Button x:Name="ScrollUp" VerticalOptions="Center" HorizontalOptions="Center" Grid.Column="1" />
-			<Button x:Name="CenterButton" VerticalOptions="Center" HorizontalOptions="Fill" Grid.Column="2" />
 			<Button x:Name="ScrollDown" VerticalOptions="Center" HorizontalOptions="Center" Grid.Column="3" />
 			<Button x:Name="MenuButton" VerticalOptions="Center" HorizontalOptions="Center" Grid.Column="4" />
 		</Grid>

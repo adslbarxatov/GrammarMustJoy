@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.RD_AAOW.GrammarMustJoy"
-	android:installLocation="internalOnly" android:versionCode="600111" android:versionName="1.3">
+	android:installLocation="internalOnly" android:versionCode="600112" android:versionName="1.3.3">
 
 	<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="34" />
 
@@ -14,7 +14,7 @@
 
 	<application android:label="Grammar must joy" android:icon="@drawable/launcher_foreground"
 		android:banner="@drawable/banner">
-		
+
 		<activity android:name="com.RD_AAOW.MainActivity" android:label="Grammar must joy"
 			android:theme="@style/SplashTheme" android:icon="@drawable/launcher_foreground"
 			android:exported="true" android:configChanges="screenSize|orientation">
@@ -36,5 +36,5 @@
 			<data android:scheme="mailto" />
 		</intent>
 	</queries>
-	
+
 </manifest>
