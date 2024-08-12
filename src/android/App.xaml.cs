@@ -23,16 +23,16 @@ namespace RD_AAOW
 
 		// Параметры прокрутки журнала
 		private bool needsScroll = true;
-		private ScrollToPosition currentScrollPosition;
+		/*private ScrollToPosition currentScrollPosition;*/
 		private int currentScrollItem;
 
 		private const int autoScrollMode = -1;
 		private const int manualScrollMode = -2;
 
-		private const ScrollToPosition scrollStart = ScrollToPosition.End;
+		/*private const ScrollToPosition scrollStart = ScrollToPosition.End;
 		private const ScrollToPosition scrollMid = ScrollToPosition.Center;
 		private const ScrollToPosition scrollEnd = ScrollToPosition.Start;
-		private const ScrollToPosition scrollFocus = ScrollToPosition.MakeVisible;
+		private const ScrollToPosition scrollFocus = ScrollToPosition.MakeVisible;*/
 
 		// Сформированные контекстные меню
 		private List<List<string>> tapMenuItems2 = new List<List<string>> ();
@@ -464,12 +464,12 @@ namespace RD_AAOW
 			// Определение варианта промотки
 			if (VisibleItem > manualScrollMode)
 				{
-				currentScrollPosition = scrollFocus;
+				/*currentScrollPosition = scrollFocus;*/
 				currentScrollItem = ToTheEnd ? (masterLog.Count - 1) : 0;
 				}
 			else
 				{
-				switch (currentScrollPosition)
+				/*switch (currentScrollPosition)
 					{
 					case scrollFocus:
 					case scrollStart:
@@ -495,25 +495,6 @@ namespace RD_AAOW
 							}
 						break;
 
-					/*case scrollMid:
-						if (ToTheEnd)
-							{
-							currentScrollPosition = scrollEnd;
-							}
-						else
-							{
-							if (currentScrollItem > 0)
-								{
-								currentScrollItem--;
-								currentScrollPosition = scrollEnd;
-								}
-							else
-								{
-								currentScrollPosition = scrollStart;
-								}
-							}
-						break;*/
-
 					case scrollEnd:
 						if (ToTheEnd)
 							{
@@ -532,6 +513,16 @@ namespace RD_AAOW
 							currentScrollPosition = scrollMid;
 							}
 						break;
+					}*/
+				if (ToTheEnd)
+					{
+					if (currentScrollItem < (masterLog.Count - 1))
+						currentScrollItem++;
+					}
+				else
+					{
+					if (currentScrollItem > 0)
+						currentScrollItem--;
 					}
 				}
 
@@ -548,7 +539,8 @@ namespace RD_AAOW
 
 			try
 				{
-				mainLog.ScrollTo (masterLog[currentScrollItem], currentScrollPosition, VisibleItem <= manualScrollMode);
+				mainLog.ScrollTo (masterLog[currentScrollItem], ScrollToPosition.MakeVisible,
+					VisibleItem <= manualScrollMode);
 				}
 			catch { }
 			return true;
@@ -578,9 +570,6 @@ namespace RD_AAOW
 				{
 				centerButton.Text = "   ";
 				}
-
-			/*if (AndroidSupport.IsTV)
-				centerButton.Focus ();*/
 			}
 
 		// Выбор оповещения для перехода или share
@@ -662,7 +651,6 @@ namespace RD_AAOW
 				if (menuItem < 0)
 					return;
 
-				/*variant += menuItem;*/
 				menuVariant = menuItem + 10 * (menuVariant + 1);
 				}
 
@@ -840,9 +828,61 @@ namespace RD_AAOW
 					}
 				else
 					{
-					AddTextToLog (newText);
-					needsScroll = true;
-					UpdateLog ();
+					// Разбиение на экраны
+					if (AndroidSupport.IsTV)
+						{
+						int left;
+						const int linesLimit = 9;
+						const int charsLimit = 60;
+						bool theFirstItem = true;
+
+						do
+							{
+							// Поиск ближайшего подходящего абзаца
+							left = -RDLocale.RN.Length;
+							for (int l = 0; l < linesLimit; l++)
+								{
+								left = newText.IndexOf (RDLocale.RN, left + RDLocale.RN.Length);
+								if ((left < 0) || (left > charsLimit * linesLimit))
+									break;
+								}
+
+							// Отделение
+							if (left < 0)
+								{
+								AddTextToLog (newText);
+								}
+							else
+								{
+								AddTextToLog (newText.Substring (0, left));
+								newText = NotificationsSupport.HeaderBeginning + "Продолжение" +
+									NotificationsSupport.HeaderEnding + MainLogItem.MainLogItemSplitter +
+									newText.Substring (left + RDLocale.RN.Length);
+								}
+
+							// Обновление журнала
+							needsScroll = theFirstItem;
+							UpdateLog ();
+							theFirstItem = false;
+
+							// При достижении конца текста немедленное завершение
+							if (left < 0)
+								break;
+							// (left > 0) обеспечивает обработку последнего фрагмента текста
+							}
+						while ((left > 0) || ((newText.Length - newText.Replace ("\n", "").Length > linesLimit) ||
+							(newText.Length > charsLimit * linesLimit)));
+						}
+
+					// Прямое направление
+					else
+						{
+						AddTextToLog (newText);
+						needsScroll = true;
+						UpdateLog ();
+						}
+
+					// Завершено
 					success = true;
 					}
 				}
