@@ -833,8 +833,13 @@ namespace RD_AAOW
 						{
 						int left;
 						const int linesLimit = 9;
-						const int charsLimit = 60;
 						bool theFirstItem = true;
+
+						int charsLimit = 60;
+						if (NotificationsSupport.LogFontSize > 20)
+							charsLimit -= 2 * (int)(NotificationsSupport.LogFontSize - 20);
+						if (charsLimit < 30)
+							charsLimit = 30;
 
 						do
 							{
