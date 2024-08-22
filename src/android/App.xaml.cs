@@ -23,16 +23,10 @@ namespace RD_AAOW
 
 		// Параметры прокрутки журнала
 		private bool needsScroll = true;
-		/*private ScrollToPosition currentScrollPosition;*/
 		private int currentScrollItem;
 
 		private const int autoScrollMode = -1;
 		private const int manualScrollMode = -2;
-
-		/*private const ScrollToPosition scrollStart = ScrollToPosition.End;
-		private const ScrollToPosition scrollMid = ScrollToPosition.Center;
-		private const ScrollToPosition scrollEnd = ScrollToPosition.Start;
-		private const ScrollToPosition scrollFocus = ScrollToPosition.MakeVisible;*/
 
 		// Сформированные контекстные меню
 		private List<List<string>> tapMenuItems2 = new List<List<string>> ();
@@ -464,56 +458,10 @@ namespace RD_AAOW
 			// Определение варианта промотки
 			if (VisibleItem > manualScrollMode)
 				{
-				/*currentScrollPosition = scrollFocus;*/
 				currentScrollItem = ToTheEnd ? (masterLog.Count - 1) : 0;
 				}
 			else
 				{
-				/*switch (currentScrollPosition)
-					{
-					case scrollFocus:
-					case scrollStart:
-					case scrollMid:
-						if (ToTheEnd)
-							{
-							if (currentScrollPosition == scrollMid)
-								currentScrollPosition = scrollEnd;
-							else
-								currentScrollPosition = scrollMid;
-							}
-						else
-							{
-							if (currentScrollItem > 0)
-								{
-								currentScrollItem--;
-								currentScrollPosition = scrollEnd;
-								}
-							else
-								{
-								currentScrollPosition = scrollStart;
-								}
-							}
-						break;
-
-					case scrollEnd:
-						if (ToTheEnd)
-							{
-							if (currentScrollItem < masterLog.Count - 1)
-								{
-								currentScrollItem++;
-								currentScrollPosition = scrollMid;
-								}
-							else
-								{
-								currentScrollPosition = scrollEnd;
-								}
-							}
-						else
-							{
-							currentScrollPosition = scrollMid;
-							}
-						break;
-					}*/
 				if (ToTheEnd)
 					{
 					if (currentScrollItem < (masterLog.Count - 1))
@@ -758,7 +706,7 @@ namespace RD_AAOW
 			{
 			// Переключение состояния кнопок и свичей
 			centerButtonEnabled = State;
-			menuButton.IsVisible = State;
+			menuButton.IsVisible = scrollDownButton.IsVisible = scrollUpButton.IsVisible = State;
 			addButton.IsVisible = State && !AndroidSupport.IsTV;
 
 			// Обновление статуса
@@ -833,7 +781,7 @@ namespace RD_AAOW
 						{
 						int left;
 						const int linesLimit = 9;
-						bool theFirstItem = true;
+						bool theFirstSegment = true;
 
 						int charsLimit = 60;
 						if (NotificationsSupport.LogFontSize > 20)
@@ -860,15 +808,23 @@ namespace RD_AAOW
 							else
 								{
 								AddTextToLog (newText.Substring (0, left));
-								newText = NotificationsSupport.HeaderBeginning + "Продолжение" +
+								newText = NotificationsSupport.HeaderBeginning + "(продолжение)" +
 									NotificationsSupport.HeaderEnding + MainLogItem.MainLogItemSplitter +
 									newText.Substring (left + RDLocale.RN.Length);
 								}
 
 							// Обновление журнала
-							needsScroll = theFirstItem;
-							UpdateLog ();
-							theFirstItem = false;
+							if (theFirstSegment)
+								{
+								needsScroll = true;
+								UpdateLog ();
+								theFirstSegment = false;
+								Thread.Sleep (500);
+								}
+							else
+								{
+								needsScroll = false;
+								}
 
 							// При достижении конца текста немедленное завершение
 							if (left < 0)
@@ -877,6 +833,8 @@ namespace RD_AAOW
 							}
 						while ((left > 0) || ((newText.Length - newText.Replace ("\n", "").Length > linesLimit) ||
 							(newText.Length > charsLimit * linesLimit)));
+
+						UpdateLog ();
 						}
 
 					// Прямое направление
