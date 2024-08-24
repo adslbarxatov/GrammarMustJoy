@@ -24,9 +24,11 @@ namespace RD_AAOW
 		// Параметры прокрутки журнала
 		private bool needsScroll = true;
 		private int currentScrollItem;
+		private int tvScrollPosition;
 
 		private const int autoScrollMode = -1;
-		private const int manualScrollMode = -2;
+		private const int manualScrollModeUp = -2;
+		private const int manualScrollModeDown = -3;
 
 		// Сформированные контекстные меню
 		private List<List<string>> tapMenuItems2 = new List<List<string>> ();
@@ -188,6 +190,7 @@ namespace RD_AAOW
 				RDDefaultButtons.Up, logFieldBackColor, ScrollUpButton_Click);
 			scrollDownButton = AndroidSupport.ApplyButtonSettings (logPage, "ScrollDown",
 				RDDefaultButtons.Down, logFieldBackColor, ScrollDownButton_Click);
+			centerButton.HeightRequest = centerButton.MaximumHeightRequest = scrollDownButton.HeightRequest;
 
 			// Режим чтения
 			AndroidSupport.ApplyLabelSettings (settingsPage, "ReadModeLabel",
@@ -196,10 +199,16 @@ namespace RD_AAOW
 				false, settingsFieldBackColor, NightModeSwitch_Toggled, NotificationsSupport.LogReadingMode);
 
 			// Расположение новых записей в конце журнала
-			AndroidSupport.ApplyLabelSettings (settingsPage, "NewsAtTheEndLabel",
+			Label nates = AndroidSupport.ApplyLabelSettings (settingsPage, "NewsAtTheEndLabel",
 				"Добавлять новые записи в конец журнала", RDLabelTypes.DefaultLeft);
 			newsAtTheEndSwitch = AndroidSupport.ApplySwitchSettings (settingsPage, "NewsAtTheEndSwitch",
 				false, settingsFieldBackColor, NewsAtTheEndSwitch_Toggled, NotificationsSupport.LogNewsItemsAtTheEnd);
+			if (AndroidSupport.IsTV)
+				{
+				nates.IsVisible = newsAtTheEndSwitch.IsVisible = false;
+				if (!NotificationsSupport.LogNewsItemsAtTheEnd)
+					NotificationsSupport.LogNewsItemsAtTheEnd = true;
+				}
 
 			menuButton = AndroidSupport.ApplyButtonSettings (logPage, "MenuButton",
 				RDDefaultButtons.Menu, logFieldBackColor, SelectPage);
@@ -283,7 +292,7 @@ namespace RD_AAOW
 				return;
 
 			needsScroll = true;
-			await ScrollMainLog (newsAtTheEndSwitch.IsToggled, autoScrollMode);
+			await ScrollMainLog (/*NotificationsSupport.LogNewsItemsAtTheEnd,*/ autoScrollMode);
 			}
 
 		// Цикл обратной связи для загрузки текущего журнала, если фоновая служба не успела завершить работу
@@ -302,6 +311,7 @@ namespace RD_AAOW
 			needsScroll = true;
 			UpdateLog ();
 
+			// Настройка и запуск
 			SetLogState (true);
 			return true;
 			}
@@ -429,6 +439,12 @@ namespace RD_AAOW
 		// Принудительное обновление лога
 		private void UpdateLog ()
 			{
+			UpdateLog (-1);
+			}
+
+		private void UpdateLog (int ScrollPosition)
+			{
+			tvScrollPosition = ScrollPosition;
 			mainLog.ItemsSource = null;
 			mainLog.ItemsSource = masterLog;
 			}
@@ -436,10 +452,13 @@ namespace RD_AAOW
 		// Промотка журнала к нужной позиции
 		private async void MainLog_ItemAppearing (object sender, ItemVisibilityEventArgs e)
 			{
-			await ScrollMainLog (newsAtTheEndSwitch.IsToggled, e.ItemIndex);
+			if (tvScrollPosition >= 0)
+				await ScrollMainLog (tvScrollPosition);
+			else
+				await ScrollMainLog (NotificationsSupport.LogNewsItemsAtTheEnd ? masterLog.Count - 1 : 0);
 			}
 
-		private async Task<bool> ScrollMainLog (bool ToTheEnd, int VisibleItem)
+		private async Task<bool> ScrollMainLog (/*bool ToTheEnd,*/ int VisibleItem)
 			{
 			// Контроль
 			if (masterLog == null)
@@ -456,25 +475,29 @@ namespace RD_AAOW
 				needsScroll = false;
 
 			// Определение варианта промотки
-			if (VisibleItem > manualScrollMode)
+			bool toTheEnd = NotificationsSupport.LogNewsItemsAtTheEnd;
+			if (VisibleItem > manualScrollModeUp)
 				{
-				currentScrollItem = ToTheEnd ? (masterLog.Count - 1) : 0;
+				/*currentScrollItem = ToTheEnd ? (masterLog.Count - 1) : 0;
+				AndroidSupport.ShowBalloon (VisibleItem.ToString (), true);*/
+				currentScrollItem = VisibleItem;
+				if (currentScrollItem < 0)
+					currentScrollItem = toTheEnd ? (masterLog.Count - 1) : 0;
+				if (currentScrollItem > masterLog.Count - 1)
+					currentScrollItem = masterLog.Count - 1;
+				}
+			else if (VisibleItem > manualScrollModeDown)
+				{
+				if (currentScrollItem > 0)
+					currentScrollItem--;
 				}
 			else
 				{
-				if (ToTheEnd)
-					{
-					if (currentScrollItem < (masterLog.Count - 1))
-						currentScrollItem++;
-					}
-				else
-					{
-					if (currentScrollItem > 0)
-						currentScrollItem--;
-					}
+				if (currentScrollItem < (masterLog.Count - 1))
+					currentScrollItem++;
 				}
 
-			if (ToTheEnd)
+			if (toTheEnd)
 				{
 				if (VisibleItem > masterLog.Count - 3)
 					needsScroll = false;
@@ -488,7 +511,7 @@ namespace RD_AAOW
 			try
 				{
 				mainLog.ScrollTo (masterLog[currentScrollItem], ScrollToPosition.MakeVisible,
-					VisibleItem <= manualScrollMode);
+					VisibleItem <= manualScrollModeUp);
 				}
 			catch { }
 			return true;
@@ -716,12 +739,12 @@ namespace RD_AAOW
 		// Добавление текста в журнал
 		private void AddTextToLog (string Text)
 			{
-			if (newsAtTheEndSwitch.IsToggled)
+			if (NotificationsSupport.LogNewsItemsAtTheEnd)
 				{
 				masterLog.Add (new MainLogItem (Text));
 
 				// Удаление верхних строк
-				while (masterLog.Count >= ProgramDescription.MasterLogMaxItems)
+				while (masterLog.Count > ProgramDescription.MasterLogMaxItems)
 					masterLog.RemoveAt (0);
 				}
 			else
@@ -729,7 +752,7 @@ namespace RD_AAOW
 				masterLog.Insert (0, new MainLogItem (Text));
 
 				// Удаление нижних строк (здесь требуется, т.к. не выполняется обрезка свойством .MainLog)
-				while (masterLog.Count >= ProgramDescription.MasterLogMaxItems)
+				while (masterLog.Count > ProgramDescription.MasterLogMaxItems)
 					masterLog.RemoveAt (masterLog.Count - 1);
 				}
 			}
@@ -781,7 +804,10 @@ namespace RD_AAOW
 						{
 						int left;
 						const int linesLimit = 9;
-						bool theFirstSegment = true;
+						/*bool theFirstSegment = true;*/
+
+						// NotificationsSupport.LogNewsItemsAtTheEnd is true
+						int scrollTo = masterLog.Count;
 
 						int charsLimit = 60;
 						if (NotificationsSupport.LogFontSize > 20)
@@ -813,7 +839,7 @@ namespace RD_AAOW
 									newText.Substring (left + RDLocale.RN.Length);
 								}
 
-							// Обновление журнала
+							/*// Обновление журнала
 							if (theFirstSegment)
 								{
 								needsScroll = true;
@@ -824,17 +850,25 @@ namespace RD_AAOW
 							else
 								{
 								needsScroll = false;
-								}
+								}*/
 
 							// При достижении конца текста немедленное завершение
 							if (left < 0)
 								break;
 							// (left > 0) обеспечивает обработку последнего фрагмента текста
+
+							// NotificationsSupport.LogNewsItemsAtTheEnd is true
+							scrollTo--;
 							}
 						while ((left > 0) || ((newText.Length - newText.Replace ("\n", "").Length > linesLimit) ||
 							(newText.Length > charsLimit * linesLimit)));
 
-						UpdateLog ();
+						needsScroll = true;
+						
+						scrollTo--; // Пока не понятно, почему -1
+						if (scrollTo < 0)
+							scrollTo = 0;
+						UpdateLog (scrollTo);
 						}
 
 					// Прямое направление
@@ -861,13 +895,13 @@ namespace RD_AAOW
 		private async void ScrollUpButton_Click (object sender, EventArgs e)
 			{
 			needsScroll = true;
-			await ScrollMainLog (false, manualScrollMode);
+			await ScrollMainLog (/*false,*/ manualScrollModeUp);
 			}
 
 		private async void ScrollDownButton_Click (object sender, EventArgs e)
 			{
 			needsScroll = true;
-			await ScrollMainLog (true, manualScrollMode);
+			await ScrollMainLog (/*true,*/ manualScrollModeDown);
 			}
 
 		// Выбор текущей страницы
