@@ -38,8 +38,8 @@
 			</StackLayout>
 
 			<StackLayout Orientation="Horizontal">
-				<Switch x:Name="ReadModeSwitch" VerticalOptions="Center" />
-				<Label x:Name="ReadModeLabel" VerticalTextAlignment="Center" />
+				<Label x:Name="LogColorLabel" VerticalOptions="Center" />
+				<Button x:Name="LogColorButton" VerticalOptions="Center" />
 			</StackLayout>
 
 			<StackLayout Orientation="Horizontal" Margin="3">

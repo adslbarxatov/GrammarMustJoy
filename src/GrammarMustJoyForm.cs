@@ -44,7 +44,7 @@ namespace RD_AAOW
 			// Получение настроек
 			RDGenerics.LoadWindowDimensions (this);
 
-			ReadMode.Checked = NotificationsSupport.LogReadingMode;
+			ReadMode.Checked = (NotificationsSupport.LogColor == 1);
 			try
 				{
 				FontSizeField.Value = NotificationsSupport.LogFontSize / 10.0m;
@@ -163,7 +163,7 @@ namespace RD_AAOW
 				}
 
 			// Запоминание
-			NotificationsSupport.LogReadingMode = ReadMode.Checked;
+			NotificationsSupport.LogColor = ReadMode.Checked ? 1u : 0;
 			}
 
 		// Изменение размера формы

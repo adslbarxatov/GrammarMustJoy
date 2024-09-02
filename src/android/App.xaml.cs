@@ -38,7 +38,7 @@ namespace RD_AAOW
 		private readonly Color
 			logMasterBackColor = Color.FromArgb ("#F0F0F0"),
 			logFieldBackColor = Color.FromArgb ("#80808080"),
-			logReadModeColor = Color.FromArgb ("#202020"),
+			/*logReadModeColor = Color.FromArgb ("#202020"),*/
 
 			settingsMasterBackColor = Color.FromArgb ("#FFF8F0"),
 			settingsFieldBackColor = Color.FromArgb ("#FFE8D0"),
@@ -48,6 +48,9 @@ namespace RD_AAOW
 			aboutMasterBackColor = Color.FromArgb ("#F0FFF0"),
 			aboutFieldBackColor = Color.FromArgb ("#D0FFD0");
 
+		private GMJPictureColorsSet pColorsSet = new GMJPictureColorsSet ();
+		/*private GMJLogColor currentLogColor;*/
+
 		#endregion
 
 		#region Переменные страниц
@@ -56,11 +59,11 @@ namespace RD_AAOW
 
 		private Label aboutLabel, fontSizeFieldLabel, groupSizeFieldLabel, aboutFontSizeField;
 
-		private Switch nightModeSwitch, newsAtTheEndSwitch, keepScreenOnSwitch,
+		private Switch /*nightModeSwitch,*/ newsAtTheEndSwitch, keepScreenOnSwitch,
 			enablePostSubscriptionSwitch;
 
 		private Button centerButton, scrollUpButton, scrollDownButton, menuButton, addButton,
-			pictureBackButton, pTextOnTheLeftButton, censorshipButton;
+			pictureBackButton, pTextOnTheLeftButton, censorshipButton, logColorButton;
 
 		private ListView mainLog;
 
@@ -70,6 +73,7 @@ namespace RD_AAOW
 		private List<string> pictureTAVariants = new List<string> ();
 		private List<string> pictureTASelectionVariants = new List<string> ();
 		private List<string> censorshipVariants = new List<string> ();
+		private List<string> logColorVariants = new List<string> ();
 
 		#endregion
 
@@ -193,10 +197,14 @@ namespace RD_AAOW
 			centerButton.HeightRequest = centerButton.MaximumHeightRequest = scrollDownButton.HeightRequest;
 
 			// Режим чтения
-			AndroidSupport.ApplyLabelSettings (settingsPage, "ReadModeLabel",
+			/*AndroidSupport.ApplyLabelSettings (settingsPage, "ReadModeLabel",
 				"Тёмная тема для журнала", RDLabelTypes.DefaultLeft);
 			nightModeSwitch = AndroidSupport.ApplySwitchSettings (settingsPage, "ReadModeSwitch",
-				false, settingsFieldBackColor, NightModeSwitch_Toggled, NotificationsSupport.LogReadingMode);
+				false, settingsFieldBackColor, NightModeSwitch_Toggled, NotificationsSupport.LogReadingMode);*/
+			AndroidSupport.ApplyLabelSettings (settingsPage, "LogColorLabel",
+				"Цветовая тема журнала:", RDLabelTypes.DefaultLeft);
+			logColorButton = AndroidSupport.ApplyButtonSettings (settingsPage, "LogColorButton",
+				" ", settingsFieldBackColor, LogColor_Clicked, false);
 
 			// Расположение новых записей в конце журнала
 			Label nates = AndroidSupport.ApplyLabelSettings (settingsPage, "NewsAtTheEndLabel",
@@ -219,8 +227,9 @@ namespace RD_AAOW
 			AndroidSupport.ApplyLabelSettings (settingsPage, "LogSettingsLabel",
 				"Главный журнал", RDLabelTypes.HeaderLeft);
 
-			// Режим чтения
-			NightModeSwitch_Toggled (null, null);
+			/*// Режим чтения
+			NightModeSwitch_Toggled (null, null);*/
+			LogColor_Clicked (null, null);
 
 			// Размер шрифта
 			fontSizeFieldLabel = AndroidSupport.ApplyLabelSettings (settingsPage, "FontSizeFieldLabel",
@@ -458,7 +467,7 @@ namespace RD_AAOW
 				await ScrollMainLog (NotificationsSupport.LogNewsItemsAtTheEnd ? masterLog.Count - 1 : 0);
 			}
 
-		private async Task<bool> ScrollMainLog (/*bool ToTheEnd,*/ int VisibleItem)
+		private async Task<bool> ScrollMainLog (int VisibleItem)
 			{
 			// Контроль
 			if (masterLog == null)
@@ -478,8 +487,6 @@ namespace RD_AAOW
 			bool toTheEnd = NotificationsSupport.LogNewsItemsAtTheEnd;
 			if (VisibleItem > manualScrollModeUp)
 				{
-				/*currentScrollItem = ToTheEnd ? (masterLog.Count - 1) : 0;
-				AndroidSupport.ShowBalloon (VisibleItem.ToString (), true);*/
 				currentScrollItem = VisibleItem;
 				if (currentScrollItem < 0)
 					currentScrollItem = toTheEnd ? (masterLog.Count - 1) : 0;
@@ -523,7 +530,8 @@ namespace RD_AAOW
 			bool red = Requesting && FinishingBackgroundRequest;
 			bool yellow = Requesting && !FinishingBackgroundRequest;
 			bool green = !Requesting && !FinishingBackgroundRequest;
-			bool dark = nightModeSwitch.IsToggled;
+			/*bool dark = nightModeSwitch.IsToggled;*/
+			bool dark = !NotificationsSupport.LogColors.CurrentColor.IsBright;
 
 			if (red || yellow || green)
 				{
@@ -693,18 +701,29 @@ namespace RD_AAOW
 						pta = (GMJPictureTextAlignment)res;
 						}
 
-					GMJPictureBackground pbk = NotificationsSupport.PicturesBackgroundType;
-					if (pbk == GMJPictureBackground.AskUser)
+					int pbk;
+					switch (NotificationsSupport.PicturesBackgroundType)
 						{
-						int res = await AndroidSupport.ShowList ("Использовать фон:",
-							RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), pictureBKSelectionVariants);
-						if (res < 0)
-							return;
+						case NotificationsSupport.PicturesBackgroundAsk:
+							int res = await AndroidSupport.ShowList ("Использовать фон:",
+								RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), pictureBKSelectionVariants);
+							if (res < 0)
+								return;
 
-						pbk = (GMJPictureBackground)(res + 2);
+							pbk = res;
+							break;
+
+						case NotificationsSupport.PicturesBackgroundRandom:
+							pbk = RDGenerics.RND.Next (pColorsSet.ColorNames.Length);
+							break;
+
+						default:
+							pbk = NotificationsSupport.PicturesBackgroundType;
+							break;
 						}
 
-					var pict = GMJPicture.CreateGMJPicture (notItem.Header, notItem.Text, pta, pbk);
+					var pict = GMJPicture.CreateGMJPicture (notItem.Header, notItem.Text, pta,
+						pColorsSet.GetColor ((uint)pbk));
 					if (pict == null)
 						{
 						AndroidSupport.ShowBalloon ("Текст записи не позволяет сформировать картинку", true);
@@ -864,7 +883,7 @@ namespace RD_AAOW
 							(newText.Length > charsLimit * linesLimit)));
 
 						needsScroll = true;
-						
+
 						scrollTo--; // Пока не понятно, почему -1
 						if (scrollTo < 0)
 							scrollTo = 0;
@@ -970,7 +989,7 @@ namespace RD_AAOW
 			UpdateLogButton (false, false);
 			}
 
-		// Включение / выключение режима чтения для лога
+		/*// Включение / выключение режима чтения для лога
 		private void NightModeSwitch_Toggled (object sender, ToggledEventArgs e)
 			{
 			if (e != null)
@@ -1002,7 +1021,7 @@ namespace RD_AAOW
 
 			// Цепляет кнопку журнала
 			UpdateLogButton (false, false);
-			}
+			}*/
 
 		// Изменение размера шрифта лога
 		private void FontSizeChanged (object sender, EventArgs e)
@@ -1077,23 +1096,23 @@ namespace RD_AAOW
 				{
 				pictureBKVariants.Add ("(спрашивать)");
 				pictureBKVariants.Add ("(случайный)");
-				pictureBKVariants.AddRange (GMJPicture.BackgroundNames);
-				pictureBKSelectionVariants.AddRange (GMJPicture.BackgroundNames);
+				pictureBKVariants.AddRange (pColorsSet.ColorNames);
+				pictureBKSelectionVariants.AddRange (pColorsSet.ColorNames);
 				}
 
 			int res;
 			if (sender == null)
 				{
-				res = (int)NotificationsSupport.PicturesBackgroundType;
+				res = NotificationsSupport.PicturesBackgroundType - NotificationsSupport.PicturesBackgroundAsk;
 				}
 			else
 				{
 				res = await AndroidSupport.ShowList ("Фон картинок",
-				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), pictureBKVariants);
+					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), pictureBKVariants);
 				if (res < 0)
 					return;
 
-				NotificationsSupport.PicturesBackgroundType = (GMJPictureBackground)res;
+				NotificationsSupport.PicturesBackgroundType = res + NotificationsSupport.PicturesBackgroundAsk;
 				}
 
 			pictureBackButton.Text = pictureBKVariants[res];
@@ -1182,6 +1201,49 @@ namespace RD_AAOW
 				{
 				GMJ.ResetFreeSet ();
 				}
+			}
+
+		// Выбор фона картинок
+		private async void LogColor_Clicked (object sender, EventArgs e)
+			{
+			// Запрос варианта
+			if (logColorVariants.Count < 1)
+				logColorVariants.AddRange (NotificationsSupport.LogColors.ColorNames);
+
+			int res;
+			if (sender == null)
+				{
+				res = (int)NotificationsSupport.LogColor;
+				}
+			else
+				{
+				res = await AndroidSupport.ShowList ("Цветовая тема журнала",
+					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), logColorVariants);
+				if (res < 0)
+					return;
+
+				NotificationsSupport.LogColor = (uint)res;
+				}
+
+			// Установка настроек
+			GMJLogColor currentLogColor = NotificationsSupport.LogColors.CurrentColor;
+			logColorButton.Text = logColorVariants[res];
+
+			logPage.BackgroundColor = mainLog.BackgroundColor = centerButton.BackgroundColor =
+				scrollUpButton.BackgroundColor = scrollDownButton.BackgroundColor =
+				menuButton.BackgroundColor = addButton.BackgroundColor = currentLogColor.BackColor;
+			scrollUpButton.TextColor = scrollDownButton.TextColor = menuButton.TextColor =
+				addButton.TextColor = currentLogColor.MainTextColor;
+
+			// Принудительное обновление (только не при старте)
+			if (sender != null)
+				{
+				needsScroll = true;
+				UpdateLog ();
+				}
+
+			// Цепляет кнопку журнала
+			UpdateLogButton (false, false);
 			}
 
 		#endregion
