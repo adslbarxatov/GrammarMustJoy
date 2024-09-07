@@ -1235,6 +1235,18 @@ namespace RD_AAOW
 			scrollUpButton.TextColor = scrollDownButton.TextColor = menuButton.TextColor =
 				addButton.TextColor = currentLogColor.MainTextColor;
 
+			NavigationPage np = (NavigationPage)MainPage;
+			if (currentLogColor.IsBright)
+				{
+				np.BarBackgroundColor = currentLogColor.MainTextColor;
+				np.BarTextColor = currentLogColor.BackColor;
+				}
+			else
+				{
+				np.BarBackgroundColor = currentLogColor.BackColor;
+				np.BarTextColor = currentLogColor.MainTextColor;
+				}
+
 			// Принудительное обновление (только не при старте)
 			if (sender != null)
 				{
