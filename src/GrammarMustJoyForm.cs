@@ -17,7 +17,10 @@ namespace RD_AAOW
 		private bool hideWindow;
 
 		private char[] groupSplitter = new char[] { '\x1' };
-		private bool csReverse = false;	// Отмена повторной обработки изменения режима цензурирования
+		private bool csReverse = false;		// Отмена повторной обработки изменения режима цензурирования
+
+		private ContextMenu bColorContextMenu;
+		/*private GMJLogColorsSet logColorsSet;*/
 
 		/// <summary>
 		/// Конструктор. Настраивает главную форму приложения
@@ -44,7 +47,9 @@ namespace RD_AAOW
 			// Получение настроек
 			RDGenerics.LoadWindowDimensions (this);
 
-			ReadMode.Checked = (NotificationsSupport.LogColor == 1);
+			/*ReadMode.Checked = (NotificationsSupport.LogColor == 1);*/
+			BColor_Clicked (null, null);		// Создание контекстного меню
+			BColor_ItemClicked (null, null);	// Подгрузка настройки
 			try
 				{
 				FontSizeField.Value = NotificationsSupport.LogFontSize / 10.0m;
@@ -148,9 +153,23 @@ namespace RD_AAOW
 			}
 
 		// Переход в режим чтения и обратно
-		private void ReadMode_CheckedChanged (object sender, EventArgs e)
+		private void BColor_Clicked (object sender, EventArgs e)
 			{
-			// Изменение состояния
+			// Создание вызывающего контекстного меню
+			if (bColorContextMenu == null)
+				{
+				bColorContextMenu = new ContextMenu ();
+				/*logColorsSet = new GMJLogColorsSet ();*/
+
+				for (int i = 0; i < NotificationsSupport.LogColors.ColorNames.Length; i++)
+					bColorContextMenu.MenuItems.Add (new MenuItem (NotificationsSupport.LogColors.ColorNames[i],
+						BColor_ItemClicked));
+				}
+
+			// Вызов
+			if (sender != null)
+				bColorContextMenu.Show (BColor, Point.Empty);
+			/*// Изменение состояния
 			if (ReadMode.Checked)
 				{
 				MainText.ForeColor = RDGenerics.GetInterfaceColor (RDInterfaceColors.LightGrey);
@@ -163,7 +182,22 @@ namespace RD_AAOW
 				}
 
 			// Запоминание
-			NotificationsSupport.LogColor = ReadMode.Checked ? 1u : 0;
+			NotificationsSupport.LogColor = ReadMode.Checked ? 1u : 0;*/
+			}
+
+		private void BColor_ItemClicked (object sender, EventArgs e)
+			{
+			// Извлечение индекса
+			int idx;
+			if (sender == null)
+				idx = (int)NotificationsSupport.LogColor;
+			else
+				idx = bColorContextMenu.MenuItems.IndexOf ((MenuItem)sender);
+
+			// Установка
+			NotificationsSupport.LogColor = (uint)idx;
+			MainText.ForeColor = NotificationsSupport.LogColors.CurrentColor.MainTextColor;
+			MainText.BackColor = NotificationsSupport.LogColors.CurrentColor.BackColor;
 			}
 
 		// Изменение размера формы

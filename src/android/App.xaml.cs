@@ -59,11 +59,11 @@ namespace RD_AAOW
 
 		private Label aboutLabel, fontSizeFieldLabel, groupSizeFieldLabel, aboutFontSizeField;
 
-		private Switch /*nightModeSwitch,*/ newsAtTheEndSwitch, keepScreenOnSwitch,
-			enablePostSubscriptionSwitch;
+		private Switch newsAtTheEndSwitch, keepScreenOnSwitch, enablePostSubscriptionSwitch;
 
 		private Button centerButton, scrollUpButton, scrollDownButton, menuButton, addButton,
-			pictureBackButton, pTextOnTheLeftButton, censorshipButton, logColorButton;
+			pictureBackButton, pTextOnTheLeftButton, censorshipButton, logColorButton,
+			pSubsButton;
 
 		private ListView mainLog;
 
@@ -197,10 +197,6 @@ namespace RD_AAOW
 			centerButton.HeightRequest = centerButton.MaximumHeightRequest = scrollDownButton.HeightRequest;
 
 			// Режим чтения
-			/*AndroidSupport.ApplyLabelSettings (settingsPage, "ReadModeLabel",
-				"Тёмная тема для журнала", RDLabelTypes.DefaultLeft);
-			nightModeSwitch = AndroidSupport.ApplySwitchSettings (settingsPage, "ReadModeSwitch",
-				false, settingsFieldBackColor, NightModeSwitch_Toggled, NotificationsSupport.LogReadingMode);*/
 			AndroidSupport.ApplyLabelSettings (settingsPage, "LogColorLabel",
 				"Цветовая тема журнала:", RDLabelTypes.DefaultLeft);
 			logColorButton = AndroidSupport.ApplyButtonSettings (settingsPage, "LogColorButton",
@@ -227,8 +223,6 @@ namespace RD_AAOW
 			AndroidSupport.ApplyLabelSettings (settingsPage, "LogSettingsLabel",
 				"Главный журнал", RDLabelTypes.HeaderLeft);
 
-			/*// Режим чтения
-			NightModeSwitch_Toggled (null, null);*/
 			LogColor_Clicked (null, null);
 
 			// Размер шрифта
@@ -275,6 +269,11 @@ namespace RD_AAOW
 				"Текст:", RDLabelTypes.DefaultLeft);
 			pTextOnTheLeftButton = AndroidSupport.ApplyButtonSettings (settingsPage, "PTextLeftButton",
 				" ", settingsFieldBackColor, PTextOnTheLeft_Toggled, false);
+
+			Label pictSubsLabel = AndroidSupport.ApplyLabelSettings (settingsPage, "PSubsLabel",
+				"Подпись:", RDLabelTypes.DefaultLeft);
+			pSubsButton = AndroidSupport.ApplyButtonSettings (settingsPage, "PSubsButton",
+				RDDefaultButtons.Select, settingsFieldBackColor, PSubs_Clicked);
 
 			if (AndroidSupport.IsTV)
 				{
@@ -593,7 +592,7 @@ namespace RD_AAOW
 				tapMenuItems2.Add (new List<string> {
 					"▷\tПерейти к источнику",
 					"☍\tПоделиться текстом",
-					"☻\tПоделиться картинкой",
+					"▒\tПоделиться картинкой",
 					"❏\tСкопировать текст",
 					secondMenuName,
 					});
@@ -730,7 +729,7 @@ namespace RD_AAOW
 						return;
 						}
 
-					await GMJPicture.SaveGMJPictureToFile (pict, notItem.Header + ".png");
+					await GMJPicture.SaveGMJPictureToFile (pict, notItem.Header);
 					break;
 
 				// Удаление из журнала
@@ -989,40 +988,6 @@ namespace RD_AAOW
 			UpdateLogButton (false, false);
 			}
 
-		/*// Включение / выключение режима чтения для лога
-		private void NightModeSwitch_Toggled (object sender, ToggledEventArgs e)
-			{
-			if (e != null)
-				NotificationsSupport.LogReadingMode = nightModeSwitch.IsToggled;
-
-			if (nightModeSwitch.IsToggled)
-				{
-				logPage.BackgroundColor = mainLog.BackgroundColor = centerButton.BackgroundColor =
-					scrollUpButton.BackgroundColor = scrollDownButton.BackgroundColor =
-					menuButton.BackgroundColor = addButton.BackgroundColor = logReadModeColor;
-				NotificationsSupport.LogFontColor = logMasterBackColor;
-				}
-			else
-				{
-				logPage.BackgroundColor = mainLog.BackgroundColor = centerButton.BackgroundColor =
-					scrollUpButton.BackgroundColor = scrollDownButton.BackgroundColor =
-					menuButton.BackgroundColor = addButton.BackgroundColor = logMasterBackColor;
-				NotificationsSupport.LogFontColor = logReadModeColor;
-				}
-			scrollUpButton.TextColor = scrollDownButton.TextColor = menuButton.TextColor =
-				addButton.TextColor = NotificationView.CurrentAntiBackColor;
-
-			// Принудительное обновление (только не при старте)
-			if (e != null)
-				{
-				needsScroll = true;
-				UpdateLog ();
-				}
-
-			// Цепляет кнопку журнала
-			UpdateLogButton (false, false);
-			}*/
-
 		// Изменение размера шрифта лога
 		private void FontSizeChanged (object sender, EventArgs e)
 			{
@@ -1157,6 +1122,24 @@ namespace RD_AAOW
 
 			// Сохранение
 			pTextOnTheLeftButton.Text = pictureTAVariants[res];
+			}
+
+		// Ввод подписи изображения
+		private async void PSubs_Clicked (object sender, EventArgs e)
+			{
+			// Ввод подписи
+			string sub = await AndroidSupport.ShowInput ("Подпись картинок",
+				"Введите подпись, которая будет добавляться на сохраняемые картинки",
+				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Save),
+				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel),
+				20, Keyboard.Text, NotificationsSupport.PicturesSubscription);
+
+			/*if (string.IsNullOrWhiteSpace (sub))
+				return;*/
+
+			// Обработка и сохранение
+			sub = sub.Replace ("\n", "").Replace ("\r", "").Replace ("\t", "");
+			NotificationsSupport.PicturesSubscription = sub;
 			}
 
 		// Выбор режима цензурирования

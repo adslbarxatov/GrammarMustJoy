@@ -70,6 +70,11 @@
 				<Button x:Name="PTextLeftButton" VerticalOptions="Center" />
 			</StackLayout>
 
+			<StackLayout Orientation="Horizontal">
+				<Label x:Name="PSubsLabel" VerticalOptions="Center" />
+				<Button x:Name="PSubsButton" VerticalOptions="Center" />
+			</StackLayout>
+
 			<Label />
 
 		</StackLayout>
