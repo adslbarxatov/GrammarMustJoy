@@ -277,8 +277,10 @@ namespace RD_AAOW
 
 			if (AndroidSupport.IsTV)
 				{
-				pictLabel.IsVisible = pictBackLabel.IsVisible = pictureBackButton.IsVisible =
-					pictTextLabel.IsVisible = pTextOnTheLeftButton.IsVisible = false;
+				pictLabel.IsVisible =
+					pictBackLabel.IsVisible = pictureBackButton.IsVisible =
+					pictTextLabel.IsVisible = pTextOnTheLeftButton.IsVisible =
+					pictSubsLabel.IsVisible = pSubsButton.IsVisible = false;
 				}
 			else
 				{

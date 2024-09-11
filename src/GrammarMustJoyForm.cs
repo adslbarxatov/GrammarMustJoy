@@ -20,7 +20,6 @@ namespace RD_AAOW
 		private bool csReverse = false;		// Отмена повторной обработки изменения режима цензурирования
 
 		private ContextMenu bColorContextMenu;
-		/*private GMJLogColorsSet logColorsSet;*/
 
 		/// <summary>
 		/// Конструктор. Настраивает главную форму приложения
@@ -47,8 +46,6 @@ namespace RD_AAOW
 			// Получение настроек
 			RDGenerics.LoadWindowDimensions (this);
 
-			/*ReadMode.Checked = (NotificationsSupport.LogColor == 1);*/
-			BColor_Clicked (null, null);		// Создание контекстного меню
 			BColor_ItemClicked (null, null);	// Подгрузка настройки
 			try
 				{
