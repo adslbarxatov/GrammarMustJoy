@@ -149,7 +149,7 @@ namespace RD_AAOW
 			this.Close ();
 			}
 
-		// Переход в режим чтения и обратно
+		// Выбор цвета журнала
 		private void BColor_Clicked (object sender, EventArgs e)
 			{
 			// Создание вызывающего контекстного меню

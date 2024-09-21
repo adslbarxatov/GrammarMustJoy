@@ -63,7 +63,7 @@ namespace RD_AAOW
 
 		private Button centerButton, scrollUpButton, scrollDownButton, menuButton, addButton,
 			pictureBackButton, pTextOnTheLeftButton, censorshipButton, logColorButton,
-			pSubsButton;
+			pSubsButton, logFontFamilyButton;
 
 		private ListView mainLog;
 
@@ -74,6 +74,7 @@ namespace RD_AAOW
 		private List<string> pictureTASelectionVariants = new List<string> ();
 		private List<string> censorshipVariants = new List<string> ();
 		private List<string> logColorVariants = new List<string> ();
+		private List<string> logFontFamilyVariants = new List<string> ();
 
 		#endregion
 
@@ -196,7 +197,7 @@ namespace RD_AAOW
 				RDDefaultButtons.Down, logFieldBackColor, ScrollDownButton_Click);
 			centerButton.HeightRequest = centerButton.MaximumHeightRequest = scrollDownButton.HeightRequest;
 
-			// Режим чтения
+			// Цвет фона журнала
 			AndroidSupport.ApplyLabelSettings (settingsPage, "LogColorLabel",
 				"Цветовая тема журнала:", RDLabelTypes.DefaultLeft);
 			logColorButton = AndroidSupport.ApplyButtonSettings (settingsPage, "LogColorButton",
@@ -256,6 +257,13 @@ namespace RD_AAOW
 
 			Censorship_Clicked (null, null);
 
+			AndroidSupport.ApplyLabelSettings (settingsPage, "LogFontFamilyLabel",
+				"Шрифт:", RDLabelTypes.DefaultLeft);
+			logFontFamilyButton = AndroidSupport.ApplyButtonSettings (settingsPage, "LogFontFamilyButton",
+				" ", settingsFieldBackColor, LogFontFamily_Clicked, false);
+
+			LogFontFamily_Clicked (null, null);
+
 			// Настройки картинок
 			Label pictLabel = AndroidSupport.ApplyLabelSettings (settingsPage, "PicturesLabel",
 				"Изображения", RDLabelTypes.HeaderLeft);
@@ -273,7 +281,7 @@ namespace RD_AAOW
 			Label pictSubsLabel = AndroidSupport.ApplyLabelSettings (settingsPage, "PSubsLabel",
 				"Подпись:", RDLabelTypes.DefaultLeft);
 			pSubsButton = AndroidSupport.ApplyButtonSettings (settingsPage, "PSubsButton",
-				RDDefaultButtons.Select, settingsFieldBackColor, PSubs_Clicked);
+				" ", settingsFieldBackColor, PSubs_Clicked, false);
 
 			if (AndroidSupport.IsTV)
 				{
@@ -286,6 +294,7 @@ namespace RD_AAOW
 				{
 				PictureBack_Clicked (null, null);
 				PTextOnTheLeft_Toggled (null, null);
+				PSubs_Clicked (null, null);
 				}
 
 			// Запуск цикла обратной связи (без ожидания)
@@ -662,6 +671,7 @@ namespace RD_AAOW
 						await ShowTips (NSTipTypes.ShareTextButton);
 
 					await Share.RequestAsync ((notItem.Header + RDLocale.RNRN + notItem.Text +
+						RDLocale.RNRN + notItem.Separator.Replace (RDLocale.RN, "") +
 						(GMJ.EnablePostSubscription ? (RDLocale.RNRN + notLink) : "")).Replace ("\r", ""),
 						ProgramDescription.AssemblyVisibleName);
 					break;
@@ -671,6 +681,7 @@ namespace RD_AAOW
 				case 22:
 				case 33:
 					RDGenerics.SendToClipboard ((notItem.Header + RDLocale.RNRN + notItem.Text +
+						RDLocale.RNRN + notItem.Separator.Replace (RDLocale.RN, "") +
 						(GMJ.EnablePostSubscription ? (RDLocale.RNRN + notLink) : "")).Replace ("\r", ""),
 						true);
 					break;
@@ -723,8 +734,9 @@ namespace RD_AAOW
 							break;
 						}
 
-					var pict = GMJPicture.CreateGMJPicture (notItem.Header, notItem.Text, pta,
-						pColorsSet.GetColor ((uint)pbk));
+					var pict = GMJPicture.CreateGMJPicture (notItem.Header, notItem.Text,
+						notItem.SeparatorIsSign ? notItem.Separator.Replace (RDLocale.RN, "") : "",
+						pta, pColorsSet.GetColor ((uint)pbk));
 					if (pict == null)
 						{
 						AndroidSupport.ShowBalloon ("Текст записи не позволяет сформировать картинку", true);
@@ -824,7 +836,6 @@ namespace RD_AAOW
 						{
 						int left;
 						const int linesLimit = 9;
-						/*bool theFirstSegment = true;*/
 
 						// NotificationsSupport.LogNewsItemsAtTheEnd is true
 						int scrollTo = masterLog.Count;
@@ -858,19 +869,6 @@ namespace RD_AAOW
 									NotificationsSupport.HeaderEnding + MainLogItem.MainLogItemSplitter +
 									newText.Substring (left + RDLocale.RN.Length);
 								}
-
-							/*// Обновление журнала
-							if (theFirstSegment)
-								{
-								needsScroll = true;
-								UpdateLog ();
-								theFirstSegment = false;
-								Thread.Sleep (500);
-								}
-							else
-								{
-								needsScroll = false;
-								}*/
 
 							// При достижении конца текста немедленное завершение
 							if (left < 0)
@@ -1130,18 +1128,25 @@ namespace RD_AAOW
 		private async void PSubs_Clicked (object sender, EventArgs e)
 			{
 			// Ввод подписи
-			string sub = await AndroidSupport.ShowInput ("Подпись картинок",
-				"Введите подпись, которая будет добавляться на сохраняемые картинки",
-				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Save),
-				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel),
-				20, Keyboard.Text, NotificationsSupport.PicturesSubscription);
+			string sub;
+			if (sender == null)
+				{
+				sub = NotificationsSupport.PicturesSubscription;
+				}
+			else
+				{
+				sub = await AndroidSupport.ShowInput ("Подпись картинок",
+					"Введите подпись, которая будет добавляться на сохраняемые картинки",
+					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Save),
+					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel),
+					20, Keyboard.Text, NotificationsSupport.PicturesSubscription);
 
-			/*if (string.IsNullOrWhiteSpace (sub))
-				return;*/
+				sub = sub.Replace ("\n", "").Replace ("\r", "").Replace ("\t", "");
+				NotificationsSupport.PicturesSubscription = sub;
+				}
 
 			// Обработка и сохранение
-			sub = sub.Replace ("\n", "").Replace ("\r", "").Replace ("\t", "");
-			NotificationsSupport.PicturesSubscription = sub;
+			pSubsButton.Text = string.IsNullOrWhiteSpace (sub) ? "(нет)" : sub;
 			}
 
 		// Выбор режима цензурирования
@@ -1241,6 +1246,53 @@ namespace RD_AAOW
 
 			// Цепляет кнопку журнала
 			UpdateLogButton (false, false);
+			}
+
+		// Изменение размера шрифта лога
+		private async void LogFontFamily_Clicked (object sender, EventArgs e)
+			{
+			// Запрос варианта
+			if (logFontFamilyVariants.Count < 1)
+				{
+				string[][] fonts = AndroidSupport.AvailableFonts;
+				for (int i = 0; i < fonts.Length; i++)
+					{
+					logFontFamilyVariants.Add (fonts[i][0]);
+					logFontFamilyVariants.Add (fonts[i][0] + " Italic");
+					}
+				}
+
+			int res;
+			if (sender == null)
+				{
+				res = (int)AndroidSupport.LogFontFamily;
+				}
+			else
+				{
+				res = await AndroidSupport.ShowList ("Шрифт журнала",
+					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), logFontFamilyVariants);
+				if (res < 0)
+					return;
+
+				AndroidSupport.LogFontFamily = (uint)res;
+				}
+
+			// Сохранение и отображение настройки в интерфейсе
+			logFontFamilyButton.Text = logFontFamilyVariants[res];
+			
+			string ff;
+			FontAttributes fa;
+			AndroidSupport.GetCurrentFontFamily (out ff, out fa);
+			
+			logFontFamilyButton.FontAttributes = fa;
+			logFontFamilyButton.FontFamily = ff;
+
+			// Обновление журнала
+			if (e != null)
+				{
+				needsScroll = true;
+				UpdateLog ();
+				}
 			}
 
 		#endregion
