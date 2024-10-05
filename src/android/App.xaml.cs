@@ -38,7 +38,6 @@ namespace RD_AAOW
 		private readonly Color
 			logMasterBackColor = Color.FromArgb ("#F0F0F0"),
 			logFieldBackColor = Color.FromArgb ("#80808080"),
-			/*logReadModeColor = Color.FromArgb ("#202020"),*/
 
 			settingsMasterBackColor = Color.FromArgb ("#FFF8F0"),
 			settingsFieldBackColor = Color.FromArgb ("#FFE8D0"),
@@ -49,7 +48,6 @@ namespace RD_AAOW
 			aboutFieldBackColor = Color.FromArgb ("#D0FFD0");
 
 		private GMJPictureColorsSet pColorsSet = new GMJPictureColorsSet ();
-		/*private GMJLogColor currentLogColor;*/
 
 		#endregion
 
@@ -145,6 +143,10 @@ namespace RD_AAOW
 
 			Image qrImage = (Image)aboutPage.FindByName ("QRImage");
 			qrImage.IsVisible = AndroidSupport.IsTV;
+
+			AndroidSupport.ApplyButtonSettings (aboutPage, "StatsButton",
+				GMJ.GMJStatsMenuItem,
+				aboutFieldBackColor, StatsButton_Click, false);
 
 			AndroidSupport.ApplyLabelSettings (aboutPage, "GenericSettingsLabel",
 				RDLocale.GetDefaultText (RDLDefaultTexts.Control_GenericSettings),
@@ -311,7 +313,7 @@ namespace RD_AAOW
 				return;
 
 			needsScroll = true;
-			await ScrollMainLog (/*NotificationsSupport.LogNewsItemsAtTheEnd,*/ autoScrollMode);
+			await ScrollMainLog (autoScrollMode);
 			}
 
 		// Цикл обратной связи для загрузки текущего журнала, если фоновая служба не успела завершить работу
@@ -540,7 +542,6 @@ namespace RD_AAOW
 			bool red = Requesting && FinishingBackgroundRequest;
 			bool yellow = Requesting && !FinishingBackgroundRequest;
 			bool green = !Requesting && !FinishingBackgroundRequest;
-			/*bool dark = nightModeSwitch.IsToggled;*/
 			bool dark = !NotificationsSupport.LogColors.CurrentColor.IsBright;
 
 			if (red || yellow || green)
@@ -913,13 +914,13 @@ namespace RD_AAOW
 		private async void ScrollUpButton_Click (object sender, EventArgs e)
 			{
 			needsScroll = true;
-			await ScrollMainLog (/*false,*/ manualScrollModeUp);
+			await ScrollMainLog (manualScrollModeUp);
 			}
 
 		private async void ScrollDownButton_Click (object sender, EventArgs e)
 			{
 			needsScroll = true;
-			await ScrollMainLog (/*true,*/ manualScrollModeDown);
+			await ScrollMainLog (manualScrollModeDown);
 			}
 
 		// Выбор текущей страницы
@@ -1333,6 +1334,12 @@ namespace RD_AAOW
 
 			aboutFontSizeField.Text = AndroidSupport.MasterFontSize.ToString ("F1");
 			aboutFontSizeField.FontSize = AndroidSupport.MasterFontSize;
+			}
+
+		// Отображение статистики архива
+		private async void StatsButton_Click (object sender, EventArgs e)
+			{
+			await AndroidSupport.ShowMessage (GMJ.GMJStats, RDLocale.GetDefaultText (RDLDefaultTexts.Button_OK));
 			}
 
 		#endregion

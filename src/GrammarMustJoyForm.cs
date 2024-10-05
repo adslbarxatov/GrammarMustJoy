@@ -19,7 +19,7 @@ namespace RD_AAOW
 		private char[] groupSplitter = new char[] { '\x1' };
 		private bool csReverse = false;		// Отмена повторной обработки изменения режима цензурирования
 
-		private ContextMenu bColorContextMenu;
+		private ContextMenu bColorContextMenu, bHelpContextMenu;
 
 		/// <summary>
 		/// Конструктор. Настраивает главную форму приложения
@@ -156,7 +156,6 @@ namespace RD_AAOW
 			if (bColorContextMenu == null)
 				{
 				bColorContextMenu = new ContextMenu ();
-				/*logColorsSet = new GMJLogColorsSet ();*/
 
 				for (int i = 0; i < NotificationsSupport.LogColors.ColorNames.Length; i++)
 					bColorContextMenu.MenuItems.Add (new MenuItem (NotificationsSupport.LogColors.ColorNames[i],
@@ -166,20 +165,6 @@ namespace RD_AAOW
 			// Вызов
 			if (sender != null)
 				bColorContextMenu.Show (BColor, Point.Empty);
-			/*// Изменение состояния
-			if (ReadMode.Checked)
-				{
-				MainText.ForeColor = RDGenerics.GetInterfaceColor (RDInterfaceColors.LightGrey);
-				MainText.BackColor = RDGenerics.GetInterfaceColor (RDInterfaceColors.DefaultText);
-				}
-			else
-				{
-				MainText.ForeColor = RDGenerics.GetInterfaceColor (RDInterfaceColors.DefaultText);
-				MainText.BackColor = RDGenerics.GetInterfaceColor (RDInterfaceColors.LightGrey);
-				}
-
-			// Запоминание
-			NotificationsSupport.LogColor = ReadMode.Checked ? 1u : 0;*/
 			}
 
 		private void BColor_ItemClicked (object sender, EventArgs e)
@@ -283,7 +268,40 @@ namespace RD_AAOW
 		// Вызов справки
 		private void BHelp_Click (object sender, EventArgs e)
 			{
-			RDGenerics.ShowAbout (false);
+			/*RDGenerics.ShowAbout (false);*/
+
+			// Создание вызывающего контекстного меню
+			if (bHelpContextMenu == null)
+				{
+				bHelpContextMenu = new ContextMenu ();
+
+				bHelpContextMenu.MenuItems.Add (new MenuItem (GMJ.GMJStatsMenuItem,
+					BHelp_ItemClicked));
+				bHelpContextMenu.MenuItems.Add (new MenuItem (RDLocale.GetDefaultText (RDLDefaultTexts.Control_AppAbout),
+					BHelp_ItemClicked));
+				}
+
+			// Вызов
+			if (sender != null)
+				bHelpContextMenu.Show (BHelp, Point.Empty);
+			}
+
+		private void BHelp_ItemClicked (object sender, EventArgs e)
+			{
+			// Извлечение индекса
+			int idx = bHelpContextMenu.MenuItems.IndexOf ((MenuItem)sender);
+
+			// Вызов
+			switch (idx)
+				{
+				case 0:
+					RDGenerics.MessageBox (RDMessageTypes.Information_Left, GMJ.GMJStats);
+					break;
+
+				case 1:
+					RDGenerics.ShowAbout (false);
+					break;
+				}
 			}
 
 		// Предложение записей
