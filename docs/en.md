@@ -20,7 +20,7 @@ We’ve been accompanying the Grammar must joy community for quite some time. An
 the conclusion suggests itself that the result of its existence wasn’t only the opportunity
 to collect some conclusions about what the ideal joke or anecdote could be. The fact is that
 in the process of filling the community, we successfully created and tested a mechanism that
-still exists as a button in the uNot application. How does it work?
+now exists as a separate application. How does it work?
 
 - First, the VK community was created, which was filled manually from various sources. *Text entries*,
 usually *not exceeding a thousand characters in length*, were used as content. They were published either
