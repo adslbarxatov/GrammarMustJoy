@@ -268,8 +268,6 @@ namespace RD_AAOW
 		// Вызов справки
 		private void BHelp_Click (object sender, EventArgs e)
 			{
-			/*RDGenerics.ShowAbout (false);*/
-
 			// Создание вызывающего контекстного меню
 			if (bHelpContextMenu == null)
 				{

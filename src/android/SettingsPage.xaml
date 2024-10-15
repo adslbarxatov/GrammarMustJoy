@@ -11,74 +11,111 @@
 
 			<StackLayout Orientation="Horizontal">
 				<Switch x:Name="KeepScreenOnSwitch" VerticalOptions="Center" />
-				<Label x:Name="KeepScreenOnLabel" VerticalTextAlignment="Center" />
+				<Label x:Name="KeepScreenOnLabel" VerticalOptions="Center" />
 			</StackLayout>
+			<Label x:Name="KeepScreenOnTip" />
+
+			<BoxView VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="1" 
+					WidthRequest="100" Color="#505050" Margin="12" />
 
 			<StackLayout Orientation="Horizontal">
 				<Switch x:Name="EnablePostSubscriptionSwitch" VerticalOptions="Center" />
-				<Label x:Name="EnablePostSubscriptionLabel" VerticalOptions="Center" VerticalTextAlignment="Center" />
+				<Label x:Name="EnablePostSubscriptionLabel" VerticalOptions="Center" />
 			</StackLayout>
+			<Label x:Name="EnablePostSubscriptionTip" />
+
+			<BoxView VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="1" 
+					WidthRequest="100" Color="#505050" Margin="12" />
 
 			<StackLayout Orientation="Horizontal" Margin="3">
-				<Label x:Name="GroupSizeFieldLabel" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" />
+				<Label x:Name="GroupSizeFieldLabel" HorizontalOptions="Start" VerticalOptions="Center" />
 
-				<Button x:Name="GroupSizeIncButton" HorizontalOptions="Start" />
-				<Button x:Name="GroupSizeDecButton" HorizontalOptions="Start" />
+				<Button x:Name="GroupSizeIncButton" HorizontalOptions="Start" VerticalOptions="Center" />
+				<Button x:Name="GroupSizeDecButton" HorizontalOptions="Start" VerticalOptions="Center" />
 			</StackLayout>
+			<Label x:Name="GroupSizeFieldTip" />
 
 			<!-- Настройки журнала -->
 			<BoxView VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="1" 
 					WidthRequest="200" Color="#505050" Margin="12" />
 
+			<Label />
 			<Label x:Name="LogSettingsLabel" />
 
 			<StackLayout Orientation="Horizontal">
 				<Switch x:Name="NewsAtTheEndSwitch" VerticalOptions="Center" />
-				<Label x:Name="NewsAtTheEndLabel" VerticalTextAlignment="Center" />
+				<Label x:Name="NewsAtTheEndLabel" VerticalOptions="Center" />
 			</StackLayout>
+			<Label x:Name="NewsAtTheEndTip" />
+
+			<BoxView VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="1" 
+					WidthRequest="100" Color="#505050" Margin="12" />
 
 			<StackLayout Orientation="Horizontal">
 				<Label x:Name="LogColorLabel" VerticalOptions="Center" />
 				<Button x:Name="LogColorButton" VerticalOptions="Center" />
 			</StackLayout>
+			<Label x:Name="LogColorTip" />
+
+			<BoxView VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="1" 
+					WidthRequest="100" Color="#505050" Margin="12" />
 
 			<StackLayout Orientation="Horizontal">
 				<Label x:Name="LogFontFamilyLabel" VerticalOptions="Center" />
 				<Button x:Name="LogFontFamilyButton" VerticalOptions="Center" />
 			</StackLayout>
+			<Label x:Name="LogFontFamilyTip" VerticalOptions="Center" />
+
+			<BoxView VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="1" 
+					WidthRequest="100" Color="#505050" Margin="12" />
 
 			<StackLayout Orientation="Horizontal" Margin="3">
-				<Label x:Name="FontSizeFieldLabel" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" />
+				<Label x:Name="FontSizeFieldLabel" HorizontalOptions="Start" VerticalOptions="Center" />
 
-				<Button x:Name="FontSizeIncButton" HorizontalOptions="Start" />
-				<Button x:Name="FontSizeDecButton" HorizontalOptions="Start" />
+				<Button x:Name="FontSizeIncButton" HorizontalOptions="Start" VerticalOptions="Center" />
+				<Button x:Name="FontSizeDecButton" HorizontalOptions="Start" VerticalOptions="Center" />
 			</StackLayout>
+			<Label x:Name="FontSizeFieldTip" />
+
+			<BoxView VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="1" 
+					WidthRequest="100" Color="#505050" Margin="12" />
 
 			<StackLayout Orientation="Horizontal">
 				<Label x:Name="CensorshipLabel" VerticalOptions="Center" />
 				<Button x:Name="CensorshipButton" VerticalOptions="Center" />
 			</StackLayout>
+			<Label x:Name="CensorshipTip" VerticalOptions="Center" />
 
 			<!-- Настройки изображений -->
 			<BoxView VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="1" 
 					WidthRequest="200" Color="#505050" Margin="12" />
 
+			<Label />
 			<Label x:Name="PicturesLabel" />
 
 			<StackLayout Orientation="Horizontal">
 				<Label x:Name="PicturesBackLabel" VerticalOptions="Center" />
 				<Button x:Name="PicturesBackButton" VerticalOptions="Center" />
 			</StackLayout>
+			<Label x:Name="PicturesBackTip" />
+
+			<BoxView VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="1" 
+					WidthRequest="100" Color="#505050" Margin="12" />
 
 			<StackLayout Orientation="Horizontal">
 				<Label x:Name="PTextLeftLabel" VerticalOptions="Center" />
 				<Button x:Name="PTextLeftButton" VerticalOptions="Center" />
 			</StackLayout>
+			<Label x:Name="PTextLeftTip" />
+
+			<BoxView VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="1" 
+					WidthRequest="100" Color="#505050" Margin="12" />
 
 			<StackLayout Orientation="Horizontal">
 				<Label x:Name="PSubsLabel" VerticalOptions="Center" />
 				<Button x:Name="PSubsButton" VerticalOptions="Center" />
 			</StackLayout>
+			<Label x:Name="PSubsTip" />
 
 			<Label />
 

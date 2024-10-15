@@ -109,22 +109,30 @@ namespace RD_AAOW
 			AndroidSupport.ApplyLabelSettings (settingsPage, "AppSettingsLabel",
 				"Просмотр", RDLabelTypes.HeaderLeft);
 
+			// Запрет спящего режима
 			AndroidSupport.ApplyLabelSettings (settingsPage, "KeepScreenOnLabel",
-				"Запретить переход в спящий режим,\nпока приложение открыто", RDLabelTypes.DefaultLeft);
+				"Запрет спящего режима", RDLabelTypes.DefaultLeft);
 			keepScreenOnSwitch = AndroidSupport.ApplySwitchSettings (settingsPage, "KeepScreenOnSwitch",
 				false, settingsFieldBackColor, KeepScreenOnSwitch_Toggled, NotificationsSupport.KeepScreenOn);
+			AndroidSupport.ApplyLabelSettings (settingsPage, "KeepScreenOnTip",
+				"Опция запрещает переход устройства в спящий режим, пока приложение открыто, " +
+				"позволяя экрану оставаться активным, пока Вы читаете тексты записей",
+				RDLabelTypes.TipLeft);
 
-			Label eps = AndroidSupport.ApplyLabelSettings (settingsPage, "EnablePostSubscriptionLabel",
-				"Добавлять ссылку на оригинал\nзаписи к тексту при действиях\n«Скопировать» и «Поделиться»",
-				RDLabelTypes.DefaultLeft);
+			// Ссылка на оригинал
+			Label eps1 = AndroidSupport.ApplyLabelSettings (settingsPage, "EnablePostSubscriptionLabel",
+				"Ссылка на оригинал", RDLabelTypes.DefaultLeft);
 			enablePostSubscriptionSwitch = AndroidSupport.ApplySwitchSettings (settingsPage,
 				"EnablePostSubscriptionSwitch", false, settingsFieldBackColor,
 				EnablePostSubscription_Toggled, GMJ.EnablePostSubscription);
+			Label eps2 = AndroidSupport.ApplyLabelSettings (settingsPage, "EnablePostSubscriptionTip",
+				"Опция обеспечивает добавление ссылки на оригинал записи к тексту при выполнении действий " +
+				"«Скопировать» и «Поделиться»", RDLabelTypes.TipLeft);
 
 			if (AndroidSupport.IsTV)
 				{
 				GMJ.EnablePostSubscription = false;
-				eps.IsVisible = enablePostSubscriptionSwitch.IsVisible = false;
+				eps1.IsVisible = eps2.IsVisible = enablePostSubscriptionSwitch.IsVisible = false;
 				}
 
 			#region Страница "О программе"
@@ -154,7 +162,7 @@ namespace RD_AAOW
 
 			AndroidSupport.ApplyLabelSettings (aboutPage, "RestartTipLabel",
 				RDLocale.GetDefaultText (RDLDefaultTexts.Message_RestartRequired),
-				RDLabelTypes.Tip);
+				RDLabelTypes.TipCenter);
 
 			AndroidSupport.ApplyLabelSettings (aboutPage, "FontSizeLabel",
 				RDLocale.GetDefaultText (RDLDefaultTexts.Control_InterfaceFontSize),
@@ -199,36 +207,45 @@ namespace RD_AAOW
 				RDDefaultButtons.Down, logFieldBackColor, ScrollDownButton_Click);
 			centerButton.HeightRequest = centerButton.MaximumHeightRequest = scrollDownButton.HeightRequest;
 
-			// Цвет фона журнала
-			AndroidSupport.ApplyLabelSettings (settingsPage, "LogColorLabel",
-				"Цветовая тема журнала:", RDLabelTypes.DefaultLeft);
-			logColorButton = AndroidSupport.ApplyButtonSettings (settingsPage, "LogColorButton",
-				" ", settingsFieldBackColor, LogColor_Clicked, false);
+			// Главный журнал
+			AndroidSupport.ApplyLabelSettings (settingsPage, "LogSettingsLabel",
+				"Журнал", RDLabelTypes.HeaderLeft);
 
 			// Расположение новых записей в конце журнала
-			Label nates = AndroidSupport.ApplyLabelSettings (settingsPage, "NewsAtTheEndLabel",
-				"Добавлять новые записи в конец журнала", RDLabelTypes.DefaultLeft);
+			Label nates1 = AndroidSupport.ApplyLabelSettings (settingsPage, "NewsAtTheEndLabel",
+				"Новые записи – снизу", RDLabelTypes.DefaultLeft);
 			newsAtTheEndSwitch = AndroidSupport.ApplySwitchSettings (settingsPage, "NewsAtTheEndSwitch",
 				false, settingsFieldBackColor, NewsAtTheEndSwitch_Toggled, NotificationsSupport.LogNewsItemsAtTheEnd);
+			Label nates2 = AndroidSupport.ApplyLabelSettings (settingsPage, "NewsAtTheEndTip",
+				"Опция позволяет добавлять новые записи в конец журнала (снизу). Если выключена, " +
+				"записи добавляются в начало журнала (сверху)", RDLabelTypes.TipLeft);
+
 			if (AndroidSupport.IsTV)
 				{
-				nates.IsVisible = newsAtTheEndSwitch.IsVisible = false;
+				nates1.IsVisible = nates2.IsVisible = newsAtTheEndSwitch.IsVisible = false;
 				if (!NotificationsSupport.LogNewsItemsAtTheEnd)
 					NotificationsSupport.LogNewsItemsAtTheEnd = true;
 				}
 
+			// Цвет фона журнала
+			AndroidSupport.ApplyLabelSettings (settingsPage, "LogColorLabel",
+				"Цветовая тема:", RDLabelTypes.DefaultLeft);
+			logColorButton = AndroidSupport.ApplyButtonSettings (settingsPage, "LogColorButton",
+				" ", settingsFieldBackColor, LogColor_Clicked, false);
+			AndroidSupport.ApplyLabelSettings (settingsPage, "LogColorTip",
+				"Опция задаёт цвета фона и текста в журнале приложения",
+				RDLabelTypes.TipLeft);
+
+			// Кнопки меню и предложения в журнале
 			menuButton = AndroidSupport.ApplyButtonSettings (logPage, "MenuButton",
 				RDDefaultButtons.Menu, logFieldBackColor, SelectPage);
 			addButton = AndroidSupport.ApplyButtonSettings (logPage, "AddButton",
 				RDDefaultButtons.Increase, logFieldBackColor, OfferTheRecord);
 			addButton.IsVisible = !AndroidSupport.IsTV;
 
-			AndroidSupport.ApplyLabelSettings (settingsPage, "LogSettingsLabel",
-				"Главный журнал", RDLabelTypes.HeaderLeft);
-
 			LogColor_Clicked (null, null);
 
-			// Размер шрифта
+			// Размер шрифта журнала
 			fontSizeFieldLabel = AndroidSupport.ApplyLabelSettings (settingsPage, "FontSizeFieldLabel",
 				"", RDLabelTypes.DefaultLeft);
 			fontSizeFieldLabel.TextType = TextType.Html;
@@ -237,6 +254,10 @@ namespace RD_AAOW
 				RDDefaultButtons.Increase, settingsFieldBackColor, FontSizeChanged);
 			AndroidSupport.ApplyButtonSettings (settingsPage, "FontSizeDecButton",
 				RDDefaultButtons.Decrease, settingsFieldBackColor, FontSizeChanged);
+
+			AndroidSupport.ApplyLabelSettings (settingsPage, "FontSizeFieldTip",
+				"Настройка задаёт кегль (размер) шрифта текста в журнале приложения",
+				RDLabelTypes.TipLeft);
 
 			FontSizeChanged (null, null);
 
@@ -250,47 +271,77 @@ namespace RD_AAOW
 			AndroidSupport.ApplyButtonSettings (settingsPage, "GroupSizeDecButton",
 				RDDefaultButtons.Decrease, settingsFieldBackColor, GroupSizeChanged);
 
+			AndroidSupport.ApplyLabelSettings (settingsPage, "GroupSizeFieldTip",
+				"Настройка задаёт количество записей, запрашиваемых подряд одним нажатием кнопки",
+				RDLabelTypes.TipLeft);
+
 			GroupSizeChanged (null, null);
 
+			// Цензурирование
 			AndroidSupport.ApplyLabelSettings (settingsPage, "CensorshipLabel",
 				"Цензурирование:", RDLabelTypes.DefaultLeft);
 			censorshipButton = AndroidSupport.ApplyButtonSettings (settingsPage, "CensorshipButton",
 				" ", settingsFieldBackColor, Censorship_Clicked, false);
+			AndroidSupport.ApplyLabelSettings (settingsPage, "CensorshipTip",
+				"Опция указывает, будут ли отображаться записи, потенциально неприемлемые " +
+				"для лиц младше 18 лет (содержащие ругательства, интимный подтекст и прочее)",
+				RDLabelTypes.TipLeft);
 
 			Censorship_Clicked (null, null);
 
+			// Шрифт журнала
 			AndroidSupport.ApplyLabelSettings (settingsPage, "LogFontFamilyLabel",
 				"Шрифт:", RDLabelTypes.DefaultLeft);
 			logFontFamilyButton = AndroidSupport.ApplyButtonSettings (settingsPage, "LogFontFamilyButton",
 				" ", settingsFieldBackColor, LogFontFamily_Clicked, false);
+			AndroidSupport.ApplyLabelSettings (settingsPage, "LogFontFamilyTip",
+				"Опция задаёт шрифт текста в журнале: " +
+				"Roboto – без засечек (несколько яркостей), " +
+				"Condensed – без засечек узкий (несколько яркостей), " +
+				"Noto – с засечками, " +
+				"Droid Sans – без засечек моноширинный",
+				RDLabelTypes.TipLeft);
 
 			LogFontFamily_Clicked (null, null);
 
 			// Настройки картинок
 			Label pictLabel = AndroidSupport.ApplyLabelSettings (settingsPage, "PicturesLabel",
-				"Изображения", RDLabelTypes.HeaderLeft);
+				"Сохраняемые картинки", RDLabelTypes.HeaderLeft);
 
-			Label pictBackLabel = AndroidSupport.ApplyLabelSettings (settingsPage, "PicturesBackLabel",
+			// Фон картинок
+			Label pictBackLabel1 = AndroidSupport.ApplyLabelSettings (settingsPage, "PicturesBackLabel",
 				"Фон:", RDLabelTypes.DefaultLeft);
 			pictureBackButton = AndroidSupport.ApplyButtonSettings (settingsPage, "PicturesBackButton",
 				" ", settingsFieldBackColor, PictureBack_Clicked, false);
+			Label pictBackLabel2 = AndroidSupport.ApplyLabelSettings (settingsPage, "PicturesBackTip",
+				"Опция задаёт цвет фона и контрастный оттенок текста для картинок либо указывает " +
+				"вариант их интерактивного выбора", RDLabelTypes.TipLeft);
 
-			Label pictTextLabel = AndroidSupport.ApplyLabelSettings (settingsPage, "PTextLeftLabel",
-				"Текст:", RDLabelTypes.DefaultLeft);
+			// Выравнивание текста
+			Label pictTextLabel1 = AndroidSupport.ApplyLabelSettings (settingsPage, "PTextLeftLabel",
+				"Выравнивание:", RDLabelTypes.DefaultLeft);
 			pTextOnTheLeftButton = AndroidSupport.ApplyButtonSettings (settingsPage, "PTextLeftButton",
 				" ", settingsFieldBackColor, PTextOnTheLeft_Toggled, false);
+			Label pictTextLabel2 = AndroidSupport.ApplyLabelSettings (settingsPage, "PTextLeftTip",
+				"Опция задаёт одинаковое выравнивание текста на картинах либо ставит его в зависимость " +
+				"от содержимого записи или выбора пользователя", RDLabelTypes.TipLeft);
 
-			Label pictSubsLabel = AndroidSupport.ApplyLabelSettings (settingsPage, "PSubsLabel",
+			// Подпись картинок
+			Label pictSubsLabel1 = AndroidSupport.ApplyLabelSettings (settingsPage, "PSubsLabel",
 				"Подпись:", RDLabelTypes.DefaultLeft);
 			pSubsButton = AndroidSupport.ApplyButtonSettings (settingsPage, "PSubsButton",
 				" ", settingsFieldBackColor, PSubs_Clicked, false);
+			Label pictSubsLabel2 = AndroidSupport.ApplyLabelSettings (settingsPage, "PSubsTip",
+				"Опция задаёт дополнительную текстовую подпись для картинок, создаваемых на этом устройстве. " +
+				"Используется в качестве Вашего индивидуального приветствия. Если не заполнена, не добавляется",
+				RDLabelTypes.TipLeft);
 
 			if (AndroidSupport.IsTV)
 				{
 				pictLabel.IsVisible =
-					pictBackLabel.IsVisible = pictureBackButton.IsVisible =
-					pictTextLabel.IsVisible = pTextOnTheLeftButton.IsVisible =
-					pictSubsLabel.IsVisible = pSubsButton.IsVisible = false;
+					pictBackLabel1.IsVisible = pictBackLabel2.IsVisible = pictureBackButton.IsVisible =
+					pictTextLabel1.IsVisible = pictTextLabel2.IsVisible = pTextOnTheLeftButton.IsVisible =
+					pictSubsLabel1.IsVisible = pictSubsLabel2.IsVisible = pSubsButton.IsVisible = false;
 				}
 			else
 				{
@@ -408,12 +459,14 @@ namespace RD_AAOW
 					break;
 
 				case NSTipTypes.MainLogClickMenuTip:
-					msg = "Все операции с текстами записей доступны по клику на них в главном журнале";
+					msg = "Все операции с текстами записей доступны по клику на них в журнале приложения";
 					break;
 
-				case NSTipTypes.KeepScreenOnTip:
-					msg = "Этот переключатель позволяет экрану оставаться активным, пока Вы читаете " +
-						"тексты записей (т. е. пока приложение открыто)";
+				case NSTipTypes.PostSubscriptions:
+					msg = "Мы не имеем ничего против отключения подписей у текстов. " +
+						"Честно. Всё-таки юмор – это общественное достояние, не допускающее каких-либо ограничений." +
+						RDLocale.RNRN + "Однако мы будем Вам весьма признательны, если Вы упомянете нас в качестве " +
+						"источника. Спасибо!";
 					break;
 				}
 
@@ -970,12 +1023,8 @@ namespace RD_AAOW
 		#region Основные настройки
 
 		// Включение / выключение фиксации экрана
-		private async void KeepScreenOnSwitch_Toggled (object sender, ToggledEventArgs e)
+		private void KeepScreenOnSwitch_Toggled (object sender, ToggledEventArgs e)
 			{
-			// Подсказки
-			if (!NotificationsSupport.TipsState.HasFlag (NSTipTypes.KeepScreenOnTip))
-				await ShowTips (NSTipTypes.KeepScreenOnTip);
-
 			NotificationsSupport.KeepScreenOn = keepScreenOnSwitch.IsToggled;
 			}
 
@@ -1008,7 +1057,7 @@ namespace RD_AAOW
 				}
 
 			// Принудительное обновление
-			fontSizeFieldLabel.Text = string.Format ("Размер шрифта в журнале: <b>{0:D}</b>", fontSize.ToString ());
+			fontSizeFieldLabel.Text = string.Format ("Размер шрифта: <b>{0:D}</b>", fontSize.ToString ());
 
 			if (e != null)
 				{
@@ -1036,20 +1085,15 @@ namespace RD_AAOW
 				}
 
 			// Принудительное обновление
-			groupSizeFieldLabel.Text = string.Format ("Число записей, получаемых<br/>по одному нажатию кнопки: " +
-				"<b>{0:D}</b>", groupSize.ToString ());
+			groupSizeFieldLabel.Text = string.Format ("Длина серии: <b>{0:D}</b>", groupSize.ToString ());
 			}
 
 		// Включение / выключение подписи
 		private async void EnablePostSubscription_Toggled (object sender, ToggledEventArgs e)
 			{
 			// Подсказки
-			if (!enablePostSubscriptionSwitch.IsToggled)
-				await AndroidSupport.ShowMessage ("Мы не имеем ничего против отключения подписей у текстов. " +
-					"Честно. Всё-таки юмор – это общественное достояние, не допускающее каких-либо ограничений." +
-					RDLocale.RNRN + "Однако мы будем Вам весьма признательны, если Вы упомянете нас в качестве " +
-					"источника. Спасибо!",
-					RDLocale.GetDefaultText (RDLDefaultTexts.Button_OK));
+			if (!NotificationsSupport.TipsState.HasFlag (NSTipTypes.PostSubscriptions))
+				await ShowTips (NSTipTypes.PostSubscriptions);
 
 			GMJ.EnablePostSubscription = enablePostSubscriptionSwitch.IsToggled;
 			}
@@ -1142,6 +1186,10 @@ namespace RD_AAOW
 					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel),
 					20, Keyboard.Text, NotificationsSupport.PicturesSubscription);
 
+				// Если действие не было отменено
+				if (sub == null)
+					return;
+
 				sub = sub.Replace ("\n", "").Replace ("\r", "").Replace ("\t", "");
 				NotificationsSupport.PicturesSubscription = sub;
 				}
@@ -1188,7 +1236,7 @@ namespace RD_AAOW
 
 			msg = (res > 0) ? GMJ.CensorshipEnableResetMessage : GMJ.CensorshipDisableResetMessage;
 			if (doReset && await AndroidSupport.ShowMessage (msg, RDLocale.GetDefaultText (RDLDefaultTexts.Button_Yes),
-				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel)))
+				RDLocale.GetDefaultText (RDLDefaultTexts.Button_No)))
 				{
 				GMJ.ResetFreeSet ();
 				}
@@ -1280,11 +1328,11 @@ namespace RD_AAOW
 
 			// Сохранение и отображение настройки в интерфейсе
 			logFontFamilyButton.Text = logFontFamilyVariants[res];
-			
+
 			string ff;
 			FontAttributes fa;
 			AndroidSupport.GetCurrentFontFamily (out ff, out fa);
-			
+
 			logFontFamilyButton.FontAttributes = fa;
 			logFontFamilyButton.FontFamily = ff;
 
