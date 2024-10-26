@@ -57,7 +57,7 @@ namespace RD_AAOW
 
 		private Label aboutLabel, fontSizeFieldLabel, groupSizeFieldLabel, aboutFontSizeField;
 
-		private Switch newsAtTheEndSwitch, keepScreenOnSwitch, enablePostSubscriptionSwitch;
+		private Switch newsAtTheEndSwitch, keepScreenOnSwitch, enableCopySubscriptionSwitch;
 
 		private Button centerButton, scrollUpButton, scrollDownButton, menuButton, addButton,
 			pictureBackButton, pTextOnTheLeftButton, censorshipButton, logColorButton,
@@ -122,17 +122,17 @@ namespace RD_AAOW
 			// Ссылка на оригинал
 			Label eps1 = AndroidSupport.ApplyLabelSettings (settingsPage, "EnablePostSubscriptionLabel",
 				"Ссылка на оригинал", RDLabelTypes.DefaultLeft);
-			enablePostSubscriptionSwitch = AndroidSupport.ApplySwitchSettings (settingsPage,
+			enableCopySubscriptionSwitch = AndroidSupport.ApplySwitchSettings (settingsPage,
 				"EnablePostSubscriptionSwitch", false, settingsFieldBackColor,
-				EnablePostSubscription_Toggled, GMJ.EnablePostSubscription);
+				EnablePostSubscription_Toggled, GMJ.EnableCopySubscription);
 			Label eps2 = AndroidSupport.ApplyLabelSettings (settingsPage, "EnablePostSubscriptionTip",
 				"Опция обеспечивает добавление ссылки на оригинал записи к тексту при выполнении действий " +
 				"«Скопировать» и «Поделиться»", RDLabelTypes.TipLeft);
 
 			if (AndroidSupport.IsTV)
 				{
-				GMJ.EnablePostSubscription = false;
-				eps1.IsVisible = eps2.IsVisible = enablePostSubscriptionSwitch.IsVisible = false;
+				GMJ.EnableCopySubscription = false;
+				eps1.IsVisible = eps2.IsVisible = enableCopySubscriptionSwitch.IsVisible = false;
 				}
 
 			#region Страница "О программе"
@@ -448,7 +448,7 @@ namespace RD_AAOW
 
 				case NSTipTypes.ShareTextButton:
 					msg = "Эта опция позволяет поделиться текстом записи";
-					if (GMJ.EnablePostSubscription)
+					if (GMJ.EnableCopySubscription)
 						msg += ("." + RDLocale.RNRN +
 							"Обратите внимание, что приложение добавляет к текстам, которыми Вы делитесь, " +
 							"ссылку на сообщество Grammar must joy");
@@ -726,7 +726,7 @@ namespace RD_AAOW
 
 					await Share.RequestAsync ((notItem.Header + RDLocale.RNRN + notItem.Text +
 						RDLocale.RNRN + notItem.Separator.Replace (RDLocale.RN, "") +
-						(GMJ.EnablePostSubscription ? (RDLocale.RNRN + notLink) : "")).Replace ("\r", ""),
+						(GMJ.EnableCopySubscription ? (RDLocale.RNRN + notLink) : "")).Replace ("\r", ""),
 						ProgramDescription.AssemblyVisibleName);
 					break;
 
@@ -736,7 +736,7 @@ namespace RD_AAOW
 				case 33:
 					RDGenerics.SendToClipboard ((notItem.Header + RDLocale.RNRN + notItem.Text +
 						RDLocale.RNRN + notItem.Separator.Replace (RDLocale.RN, "") +
-						(GMJ.EnablePostSubscription ? (RDLocale.RNRN + notLink) : "")).Replace ("\r", ""),
+						(GMJ.EnableCopySubscription ? (RDLocale.RNRN + notLink) : "")).Replace ("\r", ""),
 						true);
 					break;
 
@@ -830,7 +830,7 @@ namespace RD_AAOW
 				masterLog.Add (new MainLogItem (Text));
 
 				// Удаление верхних строк
-				while (masterLog.Count > ProgramDescription.MasterLogMaxItems)
+				while (masterLog.Count > NotificationsSupport.MasterLogMaxItems)
 					masterLog.RemoveAt (0);
 				}
 			else
@@ -838,7 +838,7 @@ namespace RD_AAOW
 				masterLog.Insert (0, new MainLogItem (Text));
 
 				// Удаление нижних строк (здесь требуется, т.к. не выполняется обрезка свойством .MainLog)
-				while (masterLog.Count > ProgramDescription.MasterLogMaxItems)
+				while (masterLog.Count > NotificationsSupport.MasterLogMaxItems)
 					masterLog.RemoveAt (masterLog.Count - 1);
 				}
 			}
@@ -1095,7 +1095,7 @@ namespace RD_AAOW
 			if (!NotificationsSupport.TipsState.HasFlag (NSTipTypes.PostSubscriptions))
 				await ShowTips (NSTipTypes.PostSubscriptions);
 
-			GMJ.EnablePostSubscription = enablePostSubscriptionSwitch.IsToggled;
+			GMJ.EnableCopySubscription = enableCopySubscriptionSwitch.IsToggled;
 			}
 
 		// Выбор фона картинок
