@@ -47,7 +47,7 @@ namespace RD_AAOW
 			aboutMasterBackColor = Color.FromArgb ("#F0FFF0"),
 			aboutFieldBackColor = Color.FromArgb ("#D0FFD0");
 
-		private GMJPictureColorsSet pColorsSet = new GMJPictureColorsSet ();
+		/*private GMJPictureColorsSet pColorsSet = new GMJPictureColorsSet ();*/
 
 		#endregion
 
@@ -57,7 +57,8 @@ namespace RD_AAOW
 
 		private Label aboutLabel, fontSizeFieldLabel, groupSizeFieldLabel, aboutFontSizeField;
 
-		private Switch newsAtTheEndSwitch, keepScreenOnSwitch, enableCopySubscriptionSwitch;
+		private Switch newsAtTheEndSwitch, keepScreenOnSwitch, enableCopySubscriptionSwitch,
+			translucencySwitch;
 
 		private Button centerButton, scrollUpButton, scrollDownButton, menuButton, addButton,
 			pictureBackButton, pTextOnTheLeftButton, censorshipButton, logColorButton,
@@ -242,6 +243,16 @@ namespace RD_AAOW
 			addButton = AndroidSupport.ApplyButtonSettings (logPage, "AddButton",
 				RDDefaultButtons.Increase, logFieldBackColor, OfferTheRecord);
 			addButton.IsVisible = !AndroidSupport.IsTV;
+
+			// Режим полупрозрачности
+			AndroidSupport.ApplyLabelSettings (settingsPage, "TranslucencyLabel",
+				"Полупрозрачность журнала", RDLabelTypes.DefaultLeft);
+			translucencySwitch = AndroidSupport.ApplySwitchSettings (settingsPage,
+				"TranslucencySwitch", false, settingsFieldBackColor,
+				Translucency_Toggled, NotificationsSupport.TranslucentLogItems);
+			AndroidSupport.ApplyLabelSettings (settingsPage, "TranslucencyTip",
+				"Опция обеспечивает отображение полупрозрачного фона у отдельных записей в журнале",
+				RDLabelTypes.TipLeft);
 
 			LogColor_Clicked (null, null);
 
@@ -697,6 +708,14 @@ namespace RD_AAOW
 				menuVariant = menuItem + 10 * (menuVariant + 1);
 				}
 
+			// Полный текст поста
+			string notText = notItem.Header + RDLocale.RNRN + notItem.Text;
+			if (!string.IsNullOrWhiteSpace (notItem.Separator))
+				notText += (RDLocale.RNRN + notItem.Separator.Replace (RDLocale.RN, ""));
+			if (GMJ.EnableCopySubscription)
+				notText += (RDLocale.RNRN + notLink);
+			notText = notText.Replace ("\r", "");
+
 			// Обработка (неподходящие варианты будут отброшены)
 			switch (menuVariant)
 				{
@@ -724,20 +743,14 @@ namespace RD_AAOW
 					if (!NotificationsSupport.TipsState.HasFlag (NSTipTypes.ShareTextButton))
 						await ShowTips (NSTipTypes.ShareTextButton);
 
-					await Share.RequestAsync ((notItem.Header + RDLocale.RNRN + notItem.Text +
-						RDLocale.RNRN + notItem.Separator.Replace (RDLocale.RN, "") +
-						(GMJ.EnableCopySubscription ? (RDLocale.RNRN + notLink) : "")).Replace ("\r", ""),
-						ProgramDescription.AssemblyVisibleName);
+					await Share.RequestAsync (notText, ProgramDescription.AssemblyVisibleName);
 					break;
 
 				// Скопировать в буфер обмена
 				case 11:
 				case 22:
 				case 33:
-					RDGenerics.SendToClipboard ((notItem.Header + RDLocale.RNRN + notItem.Text +
-						RDLocale.RNRN + notItem.Separator.Replace (RDLocale.RN, "") +
-						(GMJ.EnableCopySubscription ? (RDLocale.RNRN + notLink) : "")).Replace ("\r", ""),
-						true);
+					RDGenerics.SendToClipboard (notText, true);
 					break;
 
 				// Поделиться картинкой
@@ -780,7 +793,7 @@ namespace RD_AAOW
 							break;
 
 						case NotificationsSupport.PicturesBackgroundRandom:
-							pbk = RDGenerics.RND.Next (pColorsSet.ColorNames.Length);
+							pbk = RDGenerics.RND.Next (NotificationsSupport.PictureColors.ColorNames.Length);
 							break;
 
 						default:
@@ -790,7 +803,7 @@ namespace RD_AAOW
 
 					var pict = GMJPicture.CreateGMJPicture (notItem.Header, notItem.Text,
 						notItem.SeparatorIsSign ? notItem.Separator.Replace (RDLocale.RN, "") : "",
-						pta, pColorsSet.GetColor ((uint)pbk));
+						pta, NotificationsSupport.PictureColors.GetColor ((uint)pbk));
 					if (pict == null)
 						{
 						AndroidSupport.ShowBalloon ("Текст записи не позволяет сформировать картинку", true);
@@ -876,8 +889,7 @@ namespace RD_AAOW
 				newText = await Task.Run<string> (GMJ.GetRandomGMJ);
 				if (newText == "")
 					{
-					AndroidSupport.ShowBalloon ("Grammar must joy не ответила на запрос. " +
-						"Проверьте интернет-соединение", false);
+					AndroidSupport.ShowBalloon (GMJ.NoConnectionPattern, false);
 					}
 				else if (newText.Contains (GMJ.SourceNoReturnPattern))
 					{
@@ -1106,8 +1118,8 @@ namespace RD_AAOW
 				{
 				pictureBKVariants.Add ("(спрашивать)");
 				pictureBKVariants.Add ("(случайный)");
-				pictureBKVariants.AddRange (pColorsSet.ColorNames);
-				pictureBKSelectionVariants.AddRange (pColorsSet.ColorNames);
+				pictureBKVariants.AddRange (NotificationsSupport.PictureColors.ColorNames);
+				pictureBKSelectionVariants.AddRange (NotificationsSupport.PictureColors.ColorNames);
 				}
 
 			int res;
@@ -1295,6 +1307,14 @@ namespace RD_AAOW
 
 			// Цепляет кнопку журнала
 			UpdateLogButton (false, false);
+			}
+
+		private void Translucency_Toggled (object sender, EventArgs e)
+			{
+			NotificationsSupport.TranslucentLogItems = translucencySwitch.IsToggled;
+
+			needsScroll = true;
+			UpdateLog ();
 			}
 
 		// Изменение размера шрифта лога

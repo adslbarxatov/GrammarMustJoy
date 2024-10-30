@@ -19,7 +19,13 @@ namespace RD_AAOW
 		private char[] groupSplitter = new char[] { '\x1' };
 		private bool csReverse = false;     // Отмена повторной обработки изменения режима цензурирования
 
-		private ContextMenu bColorContextMenu, bHelpContextMenu;
+		private ContextMenu bColorContextMenu;
+		private ContextMenu bHelpContextMenu;
+		private ContextMenu textContextMenu;
+		private int textContextSender;
+
+		private const string fontFamily = "Calibri";
+		private const int transculencyAmount = 15;
 
 		/// <summary>
 		/// Конструктор. Настраивает главную форму приложения
@@ -82,6 +88,15 @@ namespace RD_AAOW
 				csReverse = false;
 				CensorshipFlag_CheckedChanged (null, null);
 				}
+
+			// Контекстное меню журнала
+			textContextMenu = new ContextMenu ();
+			textContextMenu.MenuItems.Add (new MenuItem ("Копировать текст", TextContext_ItemClicked));
+			textContextMenu.MenuItems.Add (new MenuItem ("Сохранить картинку", TextContext_ItemClicked));
+
+			// Окно сохранения картинок
+			SFDialog.Title = "Укажите расположение для сохраняемой картинки";
+			SFDialog.Filter = "Portable network graphics (*.png)|*.png";
 			}
 
 		private void GrammarMustJoyForm_Shown (object sender, EventArgs e)
@@ -168,6 +183,12 @@ namespace RD_AAOW
 				for (int i = 0; i < NotificationsSupport.LogColors.ColorNames.Length; i++)
 					bColorContextMenu.MenuItems.Add (new MenuItem (NotificationsSupport.LogColors.ColorNames[i],
 						BColor_ItemClicked));
+
+				bColorContextMenu.MenuItems.Add (new MenuItem ("-"));
+				bColorContextMenu.MenuItems.Add (new MenuItem ("Полупрозрачные элементы журнала",
+					BColor_ItemClicked));
+				bColorContextMenu.MenuItems[bColorContextMenu.MenuItems.Count - 1].Checked =
+					NotificationsSupport.TranslucentLogItems;
 				}
 
 			// Вызов
@@ -184,20 +205,32 @@ namespace RD_AAOW
 			else
 				idx = bColorContextMenu.MenuItems.IndexOf ((MenuItem)sender);
 
-			// Установка
-			NotificationsSupport.LogColor = (uint)idx;
-			/*MainText.ForeColor = NotificationsSupport.LogColors.CurrentColor.MainTextColor;
-			MainText.BackColor = NotificationsSupport.LogColors.CurrentColor.BackColor;*/
+			// Сохранение
+			if (idx < NotificationsSupport.LogColors.ColorNames.Length)
+				{
+				NotificationsSupport.LogColor = (uint)idx;
+				}
+			else
+				{
+				MenuItem mi = bColorContextMenu.MenuItems[bColorContextMenu.MenuItems.Count - 1];
+				mi.Checked = !mi.Checked;
+				NotificationsSupport.TranslucentLogItems = mi.Checked;
 
+				FontSizeField_ValueChanged (null, null);
+				}
+
+			// Установка значений
 			MainLayout.BackColor = NotificationsSupport.LogColors.CurrentColor.BackColor;
 			for (int i = 0; i < MainLayout.Controls.Count; i++)
 				{
 				Label l = (Label)MainLayout.Controls[i];
 
+				int amount = NotificationsSupport.TranslucentLogItems ? transculencyAmount : 0;
 				if (NotificationsSupport.LogColors.CurrentColor.IsBright)
-					l.BackColor = Color.FromArgb (20, 0, 0, 0);
+					l.BackColor = Color.FromArgb (amount, 0, 0, 0);
 				else
-					l.BackColor = Color.FromArgb (20, 255, 255, 255);
+					l.BackColor = Color.FromArgb (amount, 255, 255, 255);
+
 				l.ForeColor = NotificationsSupport.LogColors.CurrentColor.MainTextColor;
 				}
 			}
@@ -205,8 +238,6 @@ namespace RD_AAOW
 		// Изменение размера формы
 		private void GrammarMustJoyForm_Resize (object sender, EventArgs e)
 			{
-			/*MainText.Width = this.Width - 38;
-			MainText.Height = this.Height - ButtonsPanel.Height - 53;*/
 			MainLayout.Width = this.Width - 38;
 			MainLayout.Height = this.Height - ButtonsPanel.Height - 53;
 
@@ -216,7 +247,24 @@ namespace RD_AAOW
 		// Сохранение размера формы
 		private void GrammarMustJoyForm_ResizeEnd (object sender, EventArgs e)
 			{
+			// Сохранение настроек
 			RDGenerics.SaveWindowDimensions (this);
+			// Пересчёт размеров элементов
+			for (int i = 0; i < MainLayout.Controls.Count; i++)
+				{
+				Label l = (Label)MainLayout.Controls[i];
+				l.AutoSize = false;
+				l.MaximumSize = l.MinimumSize = LogSizeLimit;
+				l.AutoSize = true;
+				}
+			}
+
+		private Size LogSizeLimit
+			{
+			get
+				{
+				return new Size (MainLayout.Width - 6 - 18, 0);
+				}
 			}
 
 		// Запрос сообщения от GMJ
@@ -275,7 +323,7 @@ namespace RD_AAOW
 
 			if (values.Length < 1)
 				{
-				AddTextToLayout ("GMJ не отвечает на запрос. Проверьте интернет-соединение");
+				AddTextToLayout (GMJ.NoConnectionPattern);
 				}
 			else
 				{
@@ -292,26 +340,20 @@ namespace RD_AAOW
 			Label l = new Label ();
 			l.AutoSize = false;
 
+			int amount = NotificationsSupport.TranslucentLogItems ? transculencyAmount : 0;
 			if (NotificationsSupport.LogColors.CurrentColor.IsBright)
-				l.BackColor = Color.FromArgb (15, 0, 0, 0);
+				l.BackColor = Color.FromArgb (amount, 0, 0, 0);
 			else
-				l.BackColor = Color.FromArgb (15, 255, 255, 255);
+				l.BackColor = Color.FromArgb (amount, 255, 255, 255);
 
 			l.Click += TextLabel_Clicked;
-			l.Font = new Font ("Calibri", (float)FontSizeField.Value);
+			l.Font = new Font (fontFamily, (float)FontSizeField.Value);
 			l.ForeColor = NotificationsSupport.LogColors.CurrentColor.MainTextColor;
 			l.Text = Text;
-			l.Margin = new Padding (3, 3, 3, 12);
+			l.Margin = LogItemMargin;
 
-			l.MaximumSize = l.MinimumSize = new Size (MainLayout.Width - 6 - 18, 0);
+			l.MaximumSize = l.MinimumSize = LogSizeLimit;
 			l.AutoSize = true;
-
-			/*Graphics g = l.CreateGraphics ();
-			SizeF sz = g.MeasureString (l.Text, l.Font, l.Width - l.Padding.Left - l.Padding.Right);
-			l.Height = (int)sz.Height + l.Padding.Top + l.Padding.Bottom;
-
-			sz = g.MeasureString ("A", l.Font);*/
-			/*g.Dispose ();*/
 
 			// Добавление
 			MainLayout.Controls.Add (l);
@@ -324,32 +366,99 @@ namespace RD_AAOW
 			}
 
 		// Изменение размера шрифта
+		// Нажатие на элемент журнала
 		private void TextLabel_Clicked (object sender, EventArgs e)
 			{
-			string notItem = ((Label)sender).Text;
-			string notLink = "";
+			Label l = (Label)sender;
+			textContextSender = MainLayout.Controls.IndexOf (l);
 
-			int l, r;
-			if (((l = notItem.IndexOf (GMJ.NumberStringBeginning)) >= 0) &&
-				((r = notItem.IndexOf (GMJ.NumberStringEnding, l)) >= 0))
+			textContextMenu.MenuItems[1].Enabled = !l.Text.Contains (GMJ.SourceNoReturnPattern) &&
+				!l.Text.Contains (GMJ.NoConnectionPattern) && (GMJPicture.AlignString (l.Text) != null);
+
+			textContextMenu.Show (l, Point.Empty);
+			}
+
+		// Выбор варианта в меню
+		private void TextContext_ItemClicked (object sender, EventArgs e)
+			{
+			int idx = textContextMenu.MenuItems.IndexOf ((MenuItem)sender);
+			if (textContextSender < 0)
+				return;
+			Label l = (Label)MainLayout.Controls[textContextSender];
+
+			switch (idx)
 				{
-				l += GMJ.NumberStringBeginning.Length;
-				notLink = GMJ.SourceRedirectLink + "/" + notItem.Substring (l, r - l);
-				}
+				// Копировать в буфер
+				case 0:
+					string notItem = l.Text;
+					string notLink = "";
 
-			bool add = GMJ.EnableCopySubscription && !string.IsNullOrWhiteSpace (notLink);
-			RDGenerics.SendToClipboard (notItem + (add ? (RDLocale.RNRN + notLink) : ""), true);
+					int left, right;
+					if (((left = notItem.IndexOf (GMJ.NumberStringBeginning)) >= 0) &&
+						((right = notItem.IndexOf (GMJ.NumberStringEnding, left)) >= 0))
+						{
+						left += GMJ.NumberStringBeginning.Length;
+						notLink = GMJ.SourceRedirectLink + "/" + notItem.Substring (left, right - left);
+						}
+
+					bool add = GMJ.EnableCopySubscription && !string.IsNullOrWhiteSpace (notLink);
+					RDGenerics.SendToClipboard (notItem + (add ? (RDLocale.RNRN + notLink) : ""), true);
+					break;
+
+				// Сохранить картинку
+				case 1:
+					// Разделение на компоненты
+					int hSize = l.Text.IndexOf (RDLocale.RN);
+					string header = l.Text.Substring (0, hSize);
+					string text = l.Text.Substring (hSize + RDLocale.RNRN.Length);
+
+					string sub = "";
+					if (text.EndsWith ("]"))
+						{
+						int sSize = text.LastIndexOf (RDLocale.RNRN);
+						sub = text.Substring (sSize + RDLocale.RNRN.Length);
+
+						sub = sub.Substring (1, sub.Length - 2);
+						text = text.Substring (0, sSize);
+						}
+
+					// Создание изображения
+					Bitmap b = GMJPicture.CreateGMJPicture (header, text, sub,
+						GMJPictureTextAlignment.BasedOnDialogues,
+						NotificationsSupport.PictureColors.GetColor (NotificationsSupport.LogColor));
+
+					// Сохранение
+					SFDialog.FileName = GMJPicture.GetFileNameFromCode (header);
+
+					if (SFDialog.ShowDialog () == DialogResult.OK)
+						GMJPicture.SaveGMJPictureToFile (b, SFDialog.FileName);
+
+					b.Dispose ();
+					break;
+				}
 			}
 
 		// Изменение размера шрифта
 		private void FontSizeField_ValueChanged (object sender, EventArgs e)
 			{
-			Font fnt = new Font ("Calibri", (float)FontSizeField.Value);
-			/*MainText.Font = fnt;*/
-			for (int i = 0; i < MainLayout.Controls.Count; i++)
-				((Label)MainLayout.Controls[i]).Font = fnt;
-
 			NotificationsSupport.LogFontSize = (uint)(FontSizeField.Value * 10.0m);
+			Font fnt = new Font (fontFamily, (float)FontSizeField.Value);
+
+			for (int i = 0; i < MainLayout.Controls.Count; i++)
+				{
+				Label l = (Label)MainLayout.Controls[i];
+				l.Font = fnt;
+				l.Margin = LogItemMargin;
+				}
+			}
+
+		private Padding LogItemMargin
+			{
+			get
+				{
+				return new Padding (3, 3, 3, (int)NotificationsSupport.LogFontSize /
+					(NotificationsSupport.TranslucentLogItems ? 8 : 4));
+				}
 			}
 
 		// Изменение длины группы
