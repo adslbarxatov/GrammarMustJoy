@@ -17,10 +17,10 @@ namespace RD_AAOW
 		private bool hideWindow;
 
 		private char[] groupSplitter = new char[] { '\x1' };
-		private bool csReverse = false;     // Отмена повторной обработки изменения режима цензурирования
+		/*private bool csReverse = false;     // Отмена повторной обработки изменения режима цензурирования*/
 
-		private ContextMenu bColorContextMenu;
-		private ContextMenu bHelpContextMenu;
+		/*private ContextMenu bColorContextMenu;
+		private ContextMenu bHelpContextMenu;*/
 		private ContextMenu textContextMenu;
 		private int textContextSender;
 
@@ -37,7 +37,6 @@ namespace RD_AAOW
 
 			this.Text = ProgramDescription.AssemblyVisibleName;
 			this.CancelButton = BClose;
-			/*MainText.Font = new Font ("Calibri", 13);*/
 			if (!RDGenerics.AppHasAccessRights (false, false))
 				this.Text += RDLocale.GetDefaultText (RDLDefaultTexts.Message_LimitedFunctionality);
 			hideWindow = HideWindow;
@@ -46,19 +45,20 @@ namespace RD_AAOW
 			if (!RDLocale.IsCurrentLanguageRuRu)
 				RDLocale.CurrentLanguage = RDLanguages.ru_ru;
 
-			if (!GMJ.EnableCopySubscription)
-				GMJ.EnableCopySubscription = true;
+			/*if (!GMJ.EnableCopySubscription)
+				GMJ.EnableCopySubscription = true;*/
 
 			// Получение настроек
 			RDGenerics.LoadWindowDimensions (this);
 
-			BColor_ItemClicked (null, null);    // Подгрузка настройки
-			try
+			/*BColor_ItemClicked (null, null);    // Подгрузка настройки*/
+			ApplyColorsAndFonts ();
+			/*try
 				{
 				FontSizeField.Value = NotificationsSupport.LogFontSize / 10.0m;
 				GroupCountField.Value = NotificationsSupport.GroupSize;
 				}
-			catch { }
+			catch { }*/
 
 			// Настройка иконки в трее
 			ni.Icon = Properties.GrammarMustJoy.GMJNotifier16;
@@ -66,15 +66,24 @@ namespace RD_AAOW
 			ni.Visible = true;
 
 			ni.ContextMenu = new ContextMenu ();
+			ni.ContextMenu.MenuItems.Add (new MenuItem (GMJ.GMJStatsMenuItem, BHelp_ItemClicked));
+			ni.ContextMenu.MenuItems.Add (new MenuItem ("Настройки", BHelp_ItemClicked));
 			ni.ContextMenu.MenuItems.Add (new MenuItem (
-				RDLocale.GetDefaultText (RDLDefaultTexts.Control_AppAbout), AboutService));
+				RDLocale.GetDefaultText (RDLDefaultTexts.Control_AppAbout), BHelp_ItemClicked));
 			ni.ContextMenu.MenuItems.Add (new MenuItem (
-				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Exit), CloseService));
+				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Exit), BHelp_ItemClicked));
 
 			ni.MouseDown += ShowHideFullText;
-			ni.ContextMenu.MenuItems[1].DefaultItem = true;
+			/*ni.ContextMenu.MenuItems[1].DefaultItem = true;*/
 
 			// Цензурирование
+			if (RDGenerics.StartedFromMSStore)
+				{
+				if (!GMJ.EnableCensorship)
+					GMJ.EnableCensorship = true;
+				}
+
+			/*// Цензурирование
 			if (RDGenerics.StartedFromMSStore)
 				{
 				CensorshipFlag.Visible = false;
@@ -87,7 +96,7 @@ namespace RD_AAOW
 				CensorshipFlag.Checked = GMJ.EnableCensorship;
 				csReverse = false;
 				CensorshipFlag_CheckedChanged (null, null);
-				}
+				}*/
 
 			// Контекстное меню журнала
 			textContextMenu = new ContextMenu ();
@@ -107,12 +116,12 @@ namespace RD_AAOW
 				this.Hide ();
 			}
 
-		// Завершение работы службы
+		/*// Завершение работы службы
 		private void CloseService (object sender, EventArgs e)
 			{
 			allowExit = true;
 			this.Close ();
-			}
+			}*/
 
 		private void GrammarMustJoyForm_FormClosing (object sender, FormClosingEventArgs e)
 			{
@@ -131,11 +140,11 @@ namespace RD_AAOW
 				}
 			}
 
-		// О приложении
+		/*// О приложении
 		private void AboutService (object sender, EventArgs e)
 			{
 			RDGenerics.ShowAbout (false);
-			}
+			}*/
 
 		// Отображение / скрытие полного списка оповещений
 		private void ShowHideFullText (object sender, MouseEventArgs e)
@@ -154,7 +163,6 @@ namespace RD_AAOW
 				this.Show ();
 				this.TopMost = true;
 				this.TopMost = false;
-				/*MainText.ScrollToCaret ();*/
 				ScrollLog ();
 				}
 			}
@@ -172,7 +180,7 @@ namespace RD_AAOW
 			this.Close ();
 			}
 
-		// Выбор цвета журнала
+		/*// Выбор цвета журнала
 		private void BColor_Clicked (object sender, EventArgs e)
 			{
 			// Создание вызывающего контекстного меню
@@ -196,16 +204,19 @@ namespace RD_AAOW
 				bColorContextMenu.Show (BColor, Point.Empty);
 			}
 
-		private void BColor_ItemClicked (object sender, EventArgs e)
+		private void BColor_ItemClicked (object sender, EventArgs e)*/
+
+		// Загрузка параметров после настройки
+		private void ApplyColorsAndFonts ()
 			{
 			// Извлечение индекса
 			int idx;
-			if (sender == null)
-				idx = (int)NotificationsSupport.LogColor;
-			else
-				idx = bColorContextMenu.MenuItems.IndexOf ((MenuItem)sender);
+			/*if (sender == null)*/
+			idx = (int)NotificationsSupport.LogColor;
+			/*else
+				idx = bColorContextMenu.MenuItems.IndexOf ((MenuItem)sender);*/
 
-			// Сохранение
+			/*// Сохранение
 			if (idx < NotificationsSupport.LogColors.ColorNames.Length)
 				{
 				NotificationsSupport.LogColor = (uint)idx;
@@ -217,13 +228,15 @@ namespace RD_AAOW
 				NotificationsSupport.TranslucentLogItems = mi.Checked;
 
 				FontSizeField_ValueChanged (null, null);
-				}
+				}*/
 
-			// Установка значений
+			Font fnt = new Font (fontFamily, NotificationsSupport.LogFontSize / 10.0f);
 			MainLayout.BackColor = NotificationsSupport.LogColors.CurrentColor.BackColor;
 			for (int i = 0; i < MainLayout.Controls.Count; i++)
 				{
 				Label l = (Label)MainLayout.Controls[i];
+				l.Font = fnt;
+				l.Margin = LogItemMargin;
 
 				int amount = NotificationsSupport.TranslucentLogItems ? transculencyAmount : 0;
 				if (NotificationsSupport.LogColors.CurrentColor.IsBright)
@@ -242,6 +255,7 @@ namespace RD_AAOW
 			MainLayout.Height = this.Height - ButtonsPanel.Height - 53;
 
 			ButtonsPanel.Top = MainLayout.Top + MainLayout.Height + 1;
+			ButtonsPanel.Left = (this.Width - ButtonsPanel.Width) / 2;
 			}
 
 		// Сохранение размера формы
@@ -347,7 +361,7 @@ namespace RD_AAOW
 				l.BackColor = Color.FromArgb (amount, 255, 255, 255);
 
 			l.Click += TextLabel_Clicked;
-			l.Font = new Font (fontFamily, (float)FontSizeField.Value);
+			l.Font = new Font (fontFamily, NotificationsSupport.LogFontSize / 10.0f);
 			l.ForeColor = NotificationsSupport.LogColors.CurrentColor.MainTextColor;
 			l.Text = Text;
 			l.Margin = LogItemMargin;
@@ -422,10 +436,22 @@ namespace RD_AAOW
 						text = text.Substring (0, sSize);
 						}
 
+					int pbk;
+					switch (NotificationsSupport.PicturesBackgroundType)
+						{
+						case NotificationsSupport.PicturesBackgroundRandom:
+							pbk = RDGenerics.RND.Next (NotificationsSupport.PictureColors.ColorNames.Length);
+							break;
+
+						default:
+							pbk = NotificationsSupport.PicturesBackgroundType;
+							break;
+						}
+
 					// Создание изображения
 					Bitmap b = GMJPicture.CreateGMJPicture (header, text, sub,
-						GMJPictureTextAlignment.BasedOnDialogues,
-						NotificationsSupport.PictureColors.GetColor (NotificationsSupport.LogColor));
+						NotificationsSupport.PicturesTextAlignment,
+						NotificationsSupport.PictureColors.GetColor ((uint)pbk));
 
 					// Сохранение
 					SFDialog.FileName = GMJPicture.GetFileNameFromCode (header);
@@ -438,7 +464,7 @@ namespace RD_AAOW
 				}
 			}
 
-		// Изменение размера шрифта
+		/*// Изменение размера шрифта
 		private void FontSizeField_ValueChanged (object sender, EventArgs e)
 			{
 			NotificationsSupport.LogFontSize = (uint)(FontSizeField.Value * 10.0m);
@@ -450,7 +476,7 @@ namespace RD_AAOW
 				l.Font = fnt;
 				l.Margin = LogItemMargin;
 				}
-			}
+			}*/
 
 		private Padding LogItemMargin
 			{
@@ -461,13 +487,13 @@ namespace RD_AAOW
 				}
 			}
 
-		// Изменение длины группы
+		/*// Изменение длины группы
 		private void GroupCountField_ValueChanged (object sender, EventArgs e)
 			{
 			NotificationsSupport.GroupSize = (uint)GroupCountField.Value;
 			}
 
-		// Вызов справки
+		// Вызов контекстного меню иконки
 		private void BHelp_Click (object sender, EventArgs e)
 			{
 			// Создание вызывающего контекстного меню
@@ -475,8 +501,8 @@ namespace RD_AAOW
 				{
 				bHelpContextMenu = new ContextMenu ();
 
-				bHelpContextMenu.MenuItems.Add (new MenuItem (GMJ.GMJStatsMenuItem,
-					BHelp_ItemClicked));
+				bHelpContextMenu.MenuItems.Add (new MenuItem (GMJ.GMJStatsMenuItem, BHelp_ItemClicked));
+				bHelpContextMenu.MenuItems.Add (new MenuItem ("Настройки", BHelp_ItemClicked));
 				bHelpContextMenu.MenuItems.Add (new MenuItem (RDLocale.GetDefaultText (RDLDefaultTexts.Control_AppAbout),
 					BHelp_ItemClicked));
 				}
@@ -484,12 +510,12 @@ namespace RD_AAOW
 			// Вызов
 			if (sender != null)
 				bHelpContextMenu.Show (BHelp, Point.Empty);
-			}
+			}*/
 
 		private void BHelp_ItemClicked (object sender, EventArgs e)
 			{
 			// Извлечение индекса
-			int idx = bHelpContextMenu.MenuItems.IndexOf ((MenuItem)sender);
+			int idx = ni.ContextMenu.MenuItems.IndexOf ((MenuItem)sender);
 
 			// Вызов
 			switch (idx)
@@ -499,7 +525,16 @@ namespace RD_AAOW
 					break;
 
 				case 1:
+					BSettings_Click (null, null);
+					break;
+
+				case 2:
 					RDGenerics.ShowAbout (false);
+					break;
+
+				case 3:
+					allowExit = true;
+					this.Close ();
 					break;
 				}
 			}
@@ -515,7 +550,16 @@ namespace RD_AAOW
 			AboutForm.AskDeveloper ();
 			}
 
-		// Изменение режима цензурирования
+		// Вызов настроек
+		private void BSettings_Click (object sender, EventArgs e)
+			{
+			GMJSettingsForm gmjsf = new GMJSettingsForm ();
+			gmjsf.Dispose ();
+
+			ApplyColorsAndFonts ();
+			}
+
+		/*// Изменение режима цензурирования
 		private void CensorshipFlag_CheckedChanged (object sender, EventArgs e)
 			{
 			// Внешняя часть
@@ -549,6 +593,6 @@ namespace RD_AAOW
 				{
 				GMJ.ResetFreeSet ();
 				}
-			}
+			}*/
 		}
 	}

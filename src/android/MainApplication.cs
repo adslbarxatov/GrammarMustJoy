@@ -20,7 +20,7 @@ namespace RD_AAOW
 		// Переопределение события создания экземпляра программы
 		protected override MauiApp CreateMauiApp ()
 			{
-			return MauiProgram.CreateMauiApp ();
+			return MauiProgram.CreateMauiApp (); 
 			}
 		}
 	}

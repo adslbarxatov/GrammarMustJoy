@@ -38,7 +38,7 @@ namespace RD_AAOW
 
 			base.AttachBaseContext (context);
 			}
-		private bool baseContextOverriden = false;
+		private bool baseContextOverriden = false; 
 
 		/// <summary>
 		/// Обработчик события создания экземпляра

@@ -127,8 +127,7 @@ namespace RD_AAOW
 				"EnablePostSubscriptionSwitch", false, settingsFieldBackColor,
 				EnablePostSubscription_Toggled, GMJ.EnableCopySubscription);
 			Label eps2 = AndroidSupport.ApplyLabelSettings (settingsPage, "EnablePostSubscriptionTip",
-				"Опция обеспечивает добавление ссылки на оригинал записи к тексту при выполнении действий " +
-				"«Скопировать» и «Поделиться»", RDLabelTypes.TipLeft);
+				GMJ.EnablePostSubscriptionTip, RDLabelTypes.TipLeft);
 
 			if (AndroidSupport.IsTV)
 				{
@@ -234,8 +233,7 @@ namespace RD_AAOW
 			logColorButton = AndroidSupport.ApplyButtonSettings (settingsPage, "LogColorButton",
 				" ", settingsFieldBackColor, LogColor_Clicked, false);
 			AndroidSupport.ApplyLabelSettings (settingsPage, "LogColorTip",
-				"Опция задаёт цвета фона и текста в журнале приложения",
-				RDLabelTypes.TipLeft);
+				NotificationsSupport.LogColorTip, RDLabelTypes.TipLeft);
 
 			// Кнопки меню и предложения в журнале
 			menuButton = AndroidSupport.ApplyButtonSettings (logPage, "MenuButton",
@@ -251,8 +249,7 @@ namespace RD_AAOW
 				"TranslucencySwitch", false, settingsFieldBackColor,
 				Translucency_Toggled, NotificationsSupport.TranslucentLogItems);
 			AndroidSupport.ApplyLabelSettings (settingsPage, "TranslucencyTip",
-				"Опция обеспечивает отображение полупрозрачного фона у отдельных записей в журнале",
-				RDLabelTypes.TipLeft);
+				NotificationsSupport.TranslucencyTip, RDLabelTypes.TipLeft);
 
 			LogColor_Clicked (null, null);
 
@@ -267,8 +264,7 @@ namespace RD_AAOW
 				RDDefaultButtons.Decrease, settingsFieldBackColor, FontSizeChanged);
 
 			AndroidSupport.ApplyLabelSettings (settingsPage, "FontSizeFieldTip",
-				"Настройка задаёт кегль (размер) шрифта текста в журнале приложения",
-				RDLabelTypes.TipLeft);
+				NotificationsSupport.FontSizeFieldTip, RDLabelTypes.TipLeft);
 
 			FontSizeChanged (null, null);
 
@@ -281,10 +277,8 @@ namespace RD_AAOW
 				RDDefaultButtons.Increase, settingsFieldBackColor, GroupSizeChanged);
 			AndroidSupport.ApplyButtonSettings (settingsPage, "GroupSizeDecButton",
 				RDDefaultButtons.Decrease, settingsFieldBackColor, GroupSizeChanged);
-
 			AndroidSupport.ApplyLabelSettings (settingsPage, "GroupSizeFieldTip",
-				"Настройка задаёт количество записей, запрашиваемых подряд одним нажатием кнопки",
-				RDLabelTypes.TipLeft);
+				NotificationsSupport.GroupSizeFieldTip, RDLabelTypes.TipLeft);
 
 			GroupSizeChanged (null, null);
 
@@ -294,9 +288,7 @@ namespace RD_AAOW
 			censorshipButton = AndroidSupport.ApplyButtonSettings (settingsPage, "CensorshipButton",
 				" ", settingsFieldBackColor, Censorship_Clicked, false);
 			AndroidSupport.ApplyLabelSettings (settingsPage, "CensorshipTip",
-				"Опция указывает, будут ли отображаться записи, потенциально неприемлемые " +
-				"для лиц младше 18 лет (содержащие ругательства, интимный подтекст и прочее)",
-				RDLabelTypes.TipLeft);
+				GMJ.CensorshipTip, RDLabelTypes.TipLeft);
 
 			Censorship_Clicked (null, null);
 
@@ -325,8 +317,7 @@ namespace RD_AAOW
 			pictureBackButton = AndroidSupport.ApplyButtonSettings (settingsPage, "PicturesBackButton",
 				" ", settingsFieldBackColor, PictureBack_Clicked, false);
 			Label pictBackLabel2 = AndroidSupport.ApplyLabelSettings (settingsPage, "PicturesBackTip",
-				"Опция задаёт цвет фона и контрастный оттенок текста для картинок либо указывает " +
-				"вариант их интерактивного выбора", RDLabelTypes.TipLeft);
+				NotificationsSupport.PicturesBackTip, RDLabelTypes.TipLeft);
 
 			// Выравнивание текста
 			Label pictTextLabel1 = AndroidSupport.ApplyLabelSettings (settingsPage, "PTextLeftLabel",
@@ -334,8 +325,7 @@ namespace RD_AAOW
 			pTextOnTheLeftButton = AndroidSupport.ApplyButtonSettings (settingsPage, "PTextLeftButton",
 				" ", settingsFieldBackColor, PTextOnTheLeft_Toggled, false);
 			Label pictTextLabel2 = AndroidSupport.ApplyLabelSettings (settingsPage, "PTextLeftTip",
-				"Опция задаёт одинаковое выравнивание текста на картинах либо ставит его в зависимость " +
-				"от содержимого записи или выбора пользователя", RDLabelTypes.TipLeft);
+				NotificationsSupport.PicturesTextAlignmentTip, RDLabelTypes.TipLeft);
 
 			// Подпись картинок
 			Label pictSubsLabel1 = AndroidSupport.ApplyLabelSettings (settingsPage, "PSubsLabel",
@@ -343,9 +333,7 @@ namespace RD_AAOW
 			pSubsButton = AndroidSupport.ApplyButtonSettings (settingsPage, "PSubsButton",
 				" ", settingsFieldBackColor, PSubs_Clicked, false);
 			Label pictSubsLabel2 = AndroidSupport.ApplyLabelSettings (settingsPage, "PSubsTip",
-				"Опция задаёт дополнительную текстовую подпись для картинок, создаваемых на этом устройстве. " +
-				"Используется в качестве Вашего индивидуального приветствия. Если не заполнена, не добавляется",
-				RDLabelTypes.TipLeft);
+				NotificationsSupport.PicturesSubscriptionTip, RDLabelTypes.TipLeft);
 
 			if (AndroidSupport.IsTV)
 				{
@@ -474,10 +462,7 @@ namespace RD_AAOW
 					break;
 
 				case NSTipTypes.PostSubscriptions:
-					msg = "Мы не имеем ничего против отключения подписей у текстов. " +
-						"Честно. Всё-таки юмор – это общественное достояние, не допускающее каких-либо ограничений." +
-						RDLocale.RNRN + "Однако мы будем Вам весьма признательны, если Вы упомянете нас в качестве " +
-						"источника. Спасибо!";
+					msg = GMJ.PostSubscriptionDisclaimer;
 					break;
 				}
 
@@ -1172,8 +1157,7 @@ namespace RD_AAOW
 
 				NotificationsSupport.PicturesTextAlignment = (GMJPictureTextAlignment)res;
 				if (NotificationsSupport.PicturesTextAlignment == GMJPictureTextAlignment.BasedOnDialogues)
-					await AndroidSupport.ShowMessage ("Этот вариант предполагает, что тексты, содержащие диалоги, " +
-						"будут выравниваться по левой стороне, а остальные – по центру",
+					await AndroidSupport.ShowMessage (NotificationsSupport.PicturesTextAlignmentDialoguesTip,
 						RDLocale.GetDefaultText (RDLDefaultTexts.Button_OK));
 				}
 
@@ -1196,7 +1180,8 @@ namespace RD_AAOW
 					"Введите подпись, которая будет добавляться на сохраняемые картинки",
 					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Save),
 					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel),
-					20, Keyboard.Text, NotificationsSupport.PicturesSubscription);
+					NotificationsSupport.PicturesSubscriptionMaxLength,
+					Keyboard.Text, NotificationsSupport.PicturesSubscription);
 
 				// Если действие не было отменено
 				if (sub == null)
