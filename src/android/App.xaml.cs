@@ -47,8 +47,6 @@ namespace RD_AAOW
 			aboutMasterBackColor = Color.FromArgb ("#F0FFF0"),
 			aboutFieldBackColor = Color.FromArgb ("#D0FFD0");
 
-		/*private GMJPictureColorsSet pColorsSet = new GMJPictureColorsSet ();*/
-
 		#endregion
 
 		#region Переменные страниц

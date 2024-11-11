@@ -17,10 +17,7 @@ namespace RD_AAOW
 		private bool hideWindow;
 
 		private char[] groupSplitter = new char[] { '\x1' };
-		/*private bool csReverse = false;     // Отмена повторной обработки изменения режима цензурирования*/
 
-		/*private ContextMenu bColorContextMenu;
-		private ContextMenu bHelpContextMenu;*/
 		private ContextMenu textContextMenu;
 		private int textContextSender;
 
@@ -28,7 +25,7 @@ namespace RD_AAOW
 		private const int transculencyAmount = 15;
 
 		/// <summary>
-		/// Конструктор. Настраивает главную форму приложения
+		/// Конструктор. Запускает главную форму приложения
 		/// </summary>
 		public GrammarMustJoyForm (bool HideWindow)
 			{
@@ -45,20 +42,9 @@ namespace RD_AAOW
 			if (!RDLocale.IsCurrentLanguageRuRu)
 				RDLocale.CurrentLanguage = RDLanguages.ru_ru;
 
-			/*if (!GMJ.EnableCopySubscription)
-				GMJ.EnableCopySubscription = true;*/
-
 			// Получение настроек
 			RDGenerics.LoadWindowDimensions (this);
-
-			/*BColor_ItemClicked (null, null);    // Подгрузка настройки*/
 			ApplyColorsAndFonts ();
-			/*try
-				{
-				FontSizeField.Value = NotificationsSupport.LogFontSize / 10.0m;
-				GroupCountField.Value = NotificationsSupport.GroupSize;
-				}
-			catch { }*/
 
 			// Настройка иконки в трее
 			ni.Icon = Properties.GrammarMustJoy.GMJNotifier16;
@@ -74,7 +60,6 @@ namespace RD_AAOW
 				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Exit), BHelp_ItemClicked));
 
 			ni.MouseDown += ShowHideFullText;
-			/*ni.ContextMenu.MenuItems[1].DefaultItem = true;*/
 
 			// Цензурирование
 			if (RDGenerics.StartedFromMSStore)
@@ -82,21 +67,6 @@ namespace RD_AAOW
 				if (!GMJ.EnableCensorship)
 					GMJ.EnableCensorship = true;
 				}
-
-			/*// Цензурирование
-			if (RDGenerics.StartedFromMSStore)
-				{
-				CensorshipFlag.Visible = false;
-				if (!GMJ.EnableCensorship)
-					GMJ.EnableCensorship = true;
-				}
-			else
-				{
-				csReverse = true;
-				CensorshipFlag.Checked = GMJ.EnableCensorship;
-				csReverse = false;
-				CensorshipFlag_CheckedChanged (null, null);
-				}*/
 
 			// Контекстное меню журнала
 			textContextMenu = new ContextMenu ();
@@ -116,13 +86,7 @@ namespace RD_AAOW
 				this.Hide ();
 			}
 
-		/*// Завершение работы службы
-		private void CloseService (object sender, EventArgs e)
-			{
-			allowExit = true;
-			this.Close ();
-			}*/
-
+		// Закрытие окна
 		private void GrammarMustJoyForm_FormClosing (object sender, FormClosingEventArgs e)
 			{
 			// Остановка службы
@@ -139,12 +103,6 @@ namespace RD_AAOW
 				e.Cancel = true;
 				}
 			}
-
-		/*// О приложении
-		private void AboutService (object sender, EventArgs e)
-			{
-			RDGenerics.ShowAbout (false);
-			}*/
 
 		// Отображение / скрытие полного списка оповещений
 		private void ShowHideFullText (object sender, MouseEventArgs e)
@@ -180,57 +138,13 @@ namespace RD_AAOW
 			this.Close ();
 			}
 
-		/*// Выбор цвета журнала
-		private void BColor_Clicked (object sender, EventArgs e)
-			{
-			// Создание вызывающего контекстного меню
-			if (bColorContextMenu == null)
-				{
-				bColorContextMenu = new ContextMenu ();
-
-				for (int i = 0; i < NotificationsSupport.LogColors.ColorNames.Length; i++)
-					bColorContextMenu.MenuItems.Add (new MenuItem (NotificationsSupport.LogColors.ColorNames[i],
-						BColor_ItemClicked));
-
-				bColorContextMenu.MenuItems.Add (new MenuItem ("-"));
-				bColorContextMenu.MenuItems.Add (new MenuItem ("Полупрозрачные элементы журнала",
-					BColor_ItemClicked));
-				bColorContextMenu.MenuItems[bColorContextMenu.MenuItems.Count - 1].Checked =
-					NotificationsSupport.TranslucentLogItems;
-				}
-
-			// Вызов
-			if (sender != null)
-				bColorContextMenu.Show (BColor, Point.Empty);
-			}
-
-		private void BColor_ItemClicked (object sender, EventArgs e)*/
-
 		// Загрузка параметров после настройки
 		private void ApplyColorsAndFonts ()
 			{
 			// Извлечение индекса
-			int idx;
-			/*if (sender == null)*/
-			idx = (int)NotificationsSupport.LogColor;
-			/*else
-				idx = bColorContextMenu.MenuItems.IndexOf ((MenuItem)sender);*/
-
-			/*// Сохранение
-			if (idx < NotificationsSupport.LogColors.ColorNames.Length)
-				{
-				NotificationsSupport.LogColor = (uint)idx;
-				}
-			else
-				{
-				MenuItem mi = bColorContextMenu.MenuItems[bColorContextMenu.MenuItems.Count - 1];
-				mi.Checked = !mi.Checked;
-				NotificationsSupport.TranslucentLogItems = mi.Checked;
-
-				FontSizeField_ValueChanged (null, null);
-				}*/
-
+			int idx = (int)NotificationsSupport.LogColor;
 			Font fnt = new Font (fontFamily, NotificationsSupport.LogFontSize / 10.0f);
+
 			MainLayout.BackColor = NotificationsSupport.LogColors.CurrentColor.BackColor;
 			for (int i = 0; i < MainLayout.Controls.Count; i++)
 				{
@@ -309,31 +223,9 @@ namespace RD_AAOW
 			// Запрос записи
 			RDGenerics.RunWork (GetGMJExecutor, null, "Запрос случайной записи...",
 				RDRunWorkFlags.CaptionInTheMiddle);
-			/*string items = "";*/
 
 			string[] values = RDGenerics.WorkResultAsString.Split (groupSplitter,
 				StringSplitOptions.RemoveEmptyEntries);
-			/*bool empty = string.IsNullOrWhiteSpace (MainText.Text);
-
-			if (values.Length > 0)
-				{
-				for (int i = 0; i < values.Length; i++)
-					items += ((empty ? "" : RDLocale.RNRN + RDLocale.RNRN) +
-						values[i].Replace (NotificationsSupport.MainLogItemSplitter.ToString (),
-						RDLocale.RN));
-				}
-			else
-				{
-				items = (empty ? "" : RDLocale.RNRN) +
-					"GMJ не отвечает на запрос. Проверьте интернет-соединение";
-				}
-
-			// Добавление в главное окно
-			if ((MainText.Text.Length + items.Length > 40000) &&
-				(MainText.Text.Length > items.Length))   // Бывает и так
-				MainText.Text = MainText.Text.Substring (items.Length, MainText.Text.Length - items.Length);
-
-			MainText.AppendText (items);*/
 
 			if (values.Length < 1)
 				{
@@ -392,7 +284,7 @@ namespace RD_AAOW
 			textContextMenu.Show (l, Point.Empty);
 			}
 
-		// Выбор варианта в меню
+		// Выбор варианта в меню элемента в журнале
 		private void TextContext_ItemClicked (object sender, EventArgs e)
 			{
 			int idx = textContextMenu.MenuItems.IndexOf ((MenuItem)sender);
@@ -464,20 +356,6 @@ namespace RD_AAOW
 				}
 			}
 
-		/*// Изменение размера шрифта
-		private void FontSizeField_ValueChanged (object sender, EventArgs e)
-			{
-			NotificationsSupport.LogFontSize = (uint)(FontSizeField.Value * 10.0m);
-			Font fnt = new Font (fontFamily, (float)FontSizeField.Value);
-
-			for (int i = 0; i < MainLayout.Controls.Count; i++)
-				{
-				Label l = (Label)MainLayout.Controls[i];
-				l.Font = fnt;
-				l.Margin = LogItemMargin;
-				}
-			}*/
-
 		private Padding LogItemMargin
 			{
 			get
@@ -487,31 +365,7 @@ namespace RD_AAOW
 				}
 			}
 
-		/*// Изменение длины группы
-		private void GroupCountField_ValueChanged (object sender, EventArgs e)
-			{
-			NotificationsSupport.GroupSize = (uint)GroupCountField.Value;
-			}
-
-		// Вызов контекстного меню иконки
-		private void BHelp_Click (object sender, EventArgs e)
-			{
-			// Создание вызывающего контекстного меню
-			if (bHelpContextMenu == null)
-				{
-				bHelpContextMenu = new ContextMenu ();
-
-				bHelpContextMenu.MenuItems.Add (new MenuItem (GMJ.GMJStatsMenuItem, BHelp_ItemClicked));
-				bHelpContextMenu.MenuItems.Add (new MenuItem ("Настройки", BHelp_ItemClicked));
-				bHelpContextMenu.MenuItems.Add (new MenuItem (RDLocale.GetDefaultText (RDLDefaultTexts.Control_AppAbout),
-					BHelp_ItemClicked));
-				}
-
-			// Вызов
-			if (sender != null)
-				bHelpContextMenu.Show (BHelp, Point.Empty);
-			}*/
-
+		// Выбор варианта в меню иконки в трее
 		private void BHelp_ItemClicked (object sender, EventArgs e)
 			{
 			// Извлечение индекса
@@ -558,41 +412,5 @@ namespace RD_AAOW
 
 			ApplyColorsAndFonts ();
 			}
-
-		/*// Изменение режима цензурирования
-		private void CensorshipFlag_CheckedChanged (object sender, EventArgs e)
-			{
-			// Внешняя часть
-			CensorshipFlag.BackColor = RDGenerics.GetInterfaceColor (CensorshipFlag.Checked ?
-				RDInterfaceColors.SuccessMessage : RDInterfaceColors.ErrorMessage);
-
-			// Защита от множественного входа
-			if ((sender == null) || csReverse)
-				return;
-
-			// Внутренняя часть
-			string msg = CensorshipFlag.Checked ? GMJ.CensorshipEnableMessage2 : GMJ.CensorshipDisableMessage2;
-			if (RDGenerics.MessageBox (RDMessageTypes.Warning_Left, msg,
-				RDLocale.GetDefaultText (RDLDefaultTexts.Button_YesNoFocus),
-				RDLocale.GetDefaultText (RDLDefaultTexts.Button_No)) == RDMessageButtons.ButtonOne)
-				{
-				GMJ.EnableCensorship = CensorshipFlag.Checked;
-				}
-			else
-				{
-				csReverse = true;
-				CensorshipFlag.Checked = GMJ.EnableCensorship;
-				csReverse = false;
-				return;
-				}
-
-			msg = CensorshipFlag.Checked ? GMJ.CensorshipEnableResetMessage : GMJ.CensorshipDisableResetMessage;
-			if (RDGenerics.MessageBox (RDMessageTypes.Warning_Left, msg,
-				RDLocale.GetDefaultText (RDLDefaultTexts.Button_YesNoFocus),
-				RDLocale.GetDefaultText (RDLDefaultTexts.Button_No)) == RDMessageButtons.ButtonOne)
-				{
-				GMJ.ResetFreeSet ();
-				}
-			}*/
 		}
 	}
