@@ -22,7 +22,26 @@ namespace RD_AAOW
 		private int textContextSender;
 
 		private const string fontFamily = "Calibri";
-		private const int transculencyAmount = 15;
+		private const int translucencyAmount = 15;
+
+		// Динамическое ограничение ширины элементов журнала
+		private Size LogSizeLimit
+			{
+			get
+				{
+				return new Size (MainLayout.Width - 6 - 18, 0);
+				}
+			}
+
+		// Динамический внешний отступ элементов журнала
+		private Padding LogItemMargin
+			{
+			get
+				{
+				return new Padding (3, 3, 3, (int)NotificationsSupport.LogFontSize /
+					(NotificationsSupport.TranslucentLogItems ? 8 : 4));
+				}
+			}
 
 		/// <summary>
 		/// Конструктор. Запускает главную форму приложения
@@ -152,7 +171,7 @@ namespace RD_AAOW
 				l.Font = fnt;
 				l.Margin = LogItemMargin;
 
-				int amount = NotificationsSupport.TranslucentLogItems ? transculencyAmount : 0;
+				int amount = NotificationsSupport.TranslucentLogItems ? translucencyAmount : 0;
 				if (NotificationsSupport.LogColors.CurrentColor.IsBright)
 					l.BackColor = Color.FromArgb (amount, 0, 0, 0);
 				else
@@ -184,14 +203,6 @@ namespace RD_AAOW
 				l.AutoSize = false;
 				l.MaximumSize = l.MinimumSize = LogSizeLimit;
 				l.AutoSize = true;
-				}
-			}
-
-		private Size LogSizeLimit
-			{
-			get
-				{
-				return new Size (MainLayout.Width - 6 - 18, 0);
 				}
 			}
 
@@ -246,13 +257,13 @@ namespace RD_AAOW
 			Label l = new Label ();
 			l.AutoSize = false;
 
-			int amount = NotificationsSupport.TranslucentLogItems ? transculencyAmount : 0;
+			int amount = NotificationsSupport.TranslucentLogItems ? translucencyAmount : 0;
 			if (NotificationsSupport.LogColors.CurrentColor.IsBright)
 				l.BackColor = Color.FromArgb (amount, 0, 0, 0);
 			else
 				l.BackColor = Color.FromArgb (amount, 255, 255, 255);
 
-			l.Click += TextLabel_Clicked;
+			l.MouseClick += TextLabel_MouseClicked;
 			l.Font = new Font (fontFamily, NotificationsSupport.LogFontSize / 10.0f);
 			l.ForeColor = NotificationsSupport.LogColors.CurrentColor.MainTextColor;
 			l.Text = Text;
@@ -273,15 +284,16 @@ namespace RD_AAOW
 
 		// Изменение размера шрифта
 		// Нажатие на элемент журнала
-		private void TextLabel_Clicked (object sender, EventArgs e)
+		private void TextLabel_MouseClicked (object sender, MouseEventArgs e)
 			{
 			Label l = (Label)sender;
 			textContextSender = MainLayout.Controls.IndexOf (l);
 
+			// Контроль возможности формирования картинки
 			textContextMenu.MenuItems[1].Enabled = !l.Text.Contains (GMJ.SourceNoReturnPattern) &&
 				!l.Text.Contains (GMJ.NoConnectionPattern) && (GMJPicture.AlignString (l.Text) != null);
 
-			textContextMenu.Show (l, Point.Empty);
+			textContextMenu.Show (l, e.Location);
 			}
 
 		// Выбор варианта в меню элемента в журнале
@@ -353,15 +365,6 @@ namespace RD_AAOW
 
 					b.Dispose ();
 					break;
-				}
-			}
-
-		private Padding LogItemMargin
-			{
-			get
-				{
-				return new Padding (3, 3, 3, (int)NotificationsSupport.LogFontSize /
-					(NotificationsSupport.TranslucentLogItems ? 8 : 4));
 				}
 			}
 
