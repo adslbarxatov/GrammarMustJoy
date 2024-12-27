@@ -256,16 +256,24 @@ namespace RD_AAOW
 			// Формирование контрола
 			Label l = new Label ();
 			l.AutoSize = false;
+			bool err = Text.StartsWith (GMJ.NoConnectionPattern) || Text.StartsWith (GMJ.SourceNoReturnPattern);
 
 			int amount = NotificationsSupport.TranslucentLogItems ? translucencyAmount : 0;
-			if (NotificationsSupport.LogColors.CurrentColor.IsBright)
+			if (err)
+				l.BackColor = RDGenerics.GetInterfaceColor (RDInterfaceColors.WarningMessage);
+			else if (NotificationsSupport.LogColors.CurrentColor.IsBright)
 				l.BackColor = Color.FromArgb (amount, 0, 0, 0);
 			else
 				l.BackColor = Color.FromArgb (amount, 255, 255, 255);
 
 			l.MouseClick += TextLabel_MouseClicked;
 			l.Font = new Font (fontFamily, NotificationsSupport.LogFontSize / 10.0f);
-			l.ForeColor = NotificationsSupport.LogColors.CurrentColor.MainTextColor;
+
+			if (err)
+				l.ForeColor = RDGenerics.GetInterfaceColor (RDInterfaceColors.ErrorText);
+			else
+				l.ForeColor = NotificationsSupport.LogColors.CurrentColor.MainTextColor;
+
 			l.Text = Text;
 			l.Margin = LogItemMargin;
 
