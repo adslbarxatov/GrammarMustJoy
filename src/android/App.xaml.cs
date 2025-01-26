@@ -84,7 +84,7 @@ namespace RD_AAOW
 			{
 			// Инициализация
 			InitializeComponent ();
-			flags = AndroidSupport.GetAppStartupFlags (RDAppStartupFlags.DisableXPUN | RDAppStartupFlags.CanWriteFiles);
+			flags = RDGenerics.GetAppStartupFlags (RDAppStartupFlags.DisableXPUN | RDAppStartupFlags.CanWriteFiles);
 
 			if (!RDLocale.IsCurrentLanguageRuRu)
 				RDLocale.CurrentLanguage = RDLanguages.ru_ru;
@@ -92,42 +92,42 @@ namespace RD_AAOW
 			// Общая конструкция страниц приложения
 			MainPage = new MasterPage ();
 
-			settingsPage = AndroidSupport.ApplyPageSettings (new SettingsPage (), "SettingsPage",
+			settingsPage = RDInterface.ApplyPageSettings (new SettingsPage (), "SettingsPage",
 				"Настройки приложения", settingsMasterBackColor);
-			aboutPage = AndroidSupport.ApplyPageSettings (new AboutPage (), "AboutPage",
+			aboutPage = RDInterface.ApplyPageSettings (new AboutPage (), "AboutPage",
 				RDLocale.GetDefaultText (RDLDefaultTexts.Control_AppAbout), aboutMasterBackColor);
-			logPage = AndroidSupport.ApplyPageSettings (new LogPage (), "LogPage",
+			logPage = RDInterface.ApplyPageSettings (new LogPage (), "LogPage",
 				"Журнал", logMasterBackColor);
 
-			AndroidSupport.SetMasterPage (MainPage, logPage, logMasterBackColor);
+			RDInterface.SetMasterPage (MainPage, logPage, logMasterBackColor);
 
 			if (!NotificationsSupport.TipsState.HasFlag (NSTipTypes.PolicyTip))
-				AndroidSupport.SetCurrentPage (settingsPage, settingsMasterBackColor);
+				RDInterface.SetCurrentPage (settingsPage, settingsMasterBackColor);
 
 			// Настройки просмотра
-			AndroidSupport.ApplyLabelSettings (settingsPage, "AppSettingsLabel",
+			RDInterface.ApplyLabelSettings (settingsPage, "AppSettingsLabel",
 				"Просмотр", RDLabelTypes.HeaderLeft);
 
 			// Запрет спящего режима
-			AndroidSupport.ApplyLabelSettings (settingsPage, "KeepScreenOnLabel",
+			RDInterface.ApplyLabelSettings (settingsPage, "KeepScreenOnLabel",
 				"Запрет спящего режима", RDLabelTypes.DefaultLeft);
-			keepScreenOnSwitch = AndroidSupport.ApplySwitchSettings (settingsPage, "KeepScreenOnSwitch",
+			keepScreenOnSwitch = RDInterface.ApplySwitchSettings (settingsPage, "KeepScreenOnSwitch",
 				false, settingsFieldBackColor, KeepScreenOnSwitch_Toggled, NotificationsSupport.KeepScreenOn);
-			AndroidSupport.ApplyLabelSettings (settingsPage, "KeepScreenOnTip",
+			RDInterface.ApplyLabelSettings (settingsPage, "KeepScreenOnTip",
 				"Опция запрещает переход устройства в спящий режим, пока приложение открыто, " +
 				"позволяя экрану оставаться активным, пока Вы читаете тексты записей",
 				RDLabelTypes.TipLeft);
 
 			// Ссылка на оригинал
-			Label eps1 = AndroidSupport.ApplyLabelSettings (settingsPage, "EnablePostSubscriptionLabel",
+			Label eps1 = RDInterface.ApplyLabelSettings (settingsPage, "EnablePostSubscriptionLabel",
 				"Ссылка на оригинал", RDLabelTypes.DefaultLeft);
-			enableCopySubscriptionSwitch = AndroidSupport.ApplySwitchSettings (settingsPage,
+			enableCopySubscriptionSwitch = RDInterface.ApplySwitchSettings (settingsPage,
 				"EnablePostSubscriptionSwitch", false, settingsFieldBackColor,
 				EnablePostSubscription_Toggled, GMJ.EnableCopySubscription);
-			Label eps2 = AndroidSupport.ApplyLabelSettings (settingsPage, "EnablePostSubscriptionTip",
+			Label eps2 = RDInterface.ApplyLabelSettings (settingsPage, "EnablePostSubscriptionTip",
 				GMJ.EnablePostSubscriptionTip, RDLabelTypes.TipLeft);
 
-			if (AndroidSupport.IsTV)
+			if (RDGenerics.IsTV)
 				{
 				GMJ.EnableCopySubscription = false;
 				eps1.IsVisible = eps2.IsVisible = enableCopySubscriptionSwitch.IsVisible = false;
@@ -135,48 +135,48 @@ namespace RD_AAOW
 
 			#region Страница "О программе"
 
-			aboutLabel = AndroidSupport.ApplyLabelSettings (aboutPage, "AboutLabel",
+			aboutLabel = RDInterface.ApplyLabelSettings (aboutPage, "AboutLabel",
 				RDGenerics.AppAboutLabelText, RDLabelTypes.AppAbout);
 
-			AndroidSupport.ApplyButtonSettings (aboutPage, "ManualsButton",
+			RDInterface.ApplyButtonSettings (aboutPage, "ManualsButton",
 				RDLocale.GetDefaultText (RDLDefaultTexts.Control_ReferenceMaterials),
 				aboutFieldBackColor, ReferenceButton_Click, false);
 
-			Button hlp = AndroidSupport.ApplyButtonSettings (aboutPage, "HelpButton",
+			Button hlp = RDInterface.ApplyButtonSettings (aboutPage, "HelpButton",
 				RDLocale.GetDefaultText (RDLDefaultTexts.Control_HelpSupport),
 				aboutFieldBackColor, HelpButton_Click, false);
-			hlp.IsVisible = !AndroidSupport.IsTV;
+			hlp.IsVisible = !RDGenerics.IsTV;
 
 			Image qrImage = (Image)aboutPage.FindByName ("QRImage");
-			qrImage.IsVisible = AndroidSupport.IsTV;
+			qrImage.IsVisible = RDGenerics.IsTV;
 
-			AndroidSupport.ApplyButtonSettings (aboutPage, "StatsButton",
+			RDInterface.ApplyButtonSettings (aboutPage, "StatsButton",
 				GMJ.GMJStatsMenuItem,
 				aboutFieldBackColor, StatsButton_Click, false);
 
-			AndroidSupport.ApplyLabelSettings (aboutPage, "GenericSettingsLabel",
+			RDInterface.ApplyLabelSettings (aboutPage, "GenericSettingsLabel",
 				RDLocale.GetDefaultText (RDLDefaultTexts.Control_GenericSettings),
 				RDLabelTypes.HeaderLeft);
 
-			AndroidSupport.ApplyLabelSettings (aboutPage, "RestartTipLabel",
+			RDInterface.ApplyLabelSettings (aboutPage, "RestartTipLabel",
 				RDLocale.GetDefaultText (RDLDefaultTexts.Message_RestartRequired),
 				RDLabelTypes.TipCenter);
 
-			AndroidSupport.ApplyLabelSettings (aboutPage, "FontSizeLabel",
+			RDInterface.ApplyLabelSettings (aboutPage, "FontSizeLabel",
 				RDLocale.GetDefaultText (RDLDefaultTexts.Control_InterfaceFontSize),
 				RDLabelTypes.DefaultLeft);
-			AndroidSupport.ApplyButtonSettings (aboutPage, "FontSizeInc",
+			RDInterface.ApplyButtonSettings (aboutPage, "FontSizeInc",
 				RDDefaultButtons.Increase, aboutFieldBackColor, FontSizeButton_Clicked);
-			AndroidSupport.ApplyButtonSettings (aboutPage, "FontSizeDec",
+			RDInterface.ApplyButtonSettings (aboutPage, "FontSizeDec",
 				RDDefaultButtons.Decrease, aboutFieldBackColor, FontSizeButton_Clicked);
-			aboutFontSizeField = AndroidSupport.ApplyLabelSettings (aboutPage, "FontSizeField",
+			aboutFontSizeField = RDInterface.ApplyLabelSettings (aboutPage, "FontSizeField",
 				" ", RDLabelTypes.DefaultCenter);
 
-			AndroidSupport.ApplyLabelSettings (aboutPage, "HelpHeaderLabel",
+			RDInterface.ApplyLabelSettings (aboutPage, "HelpHeaderLabel",
 				RDLocale.GetDefaultText (RDLDefaultTexts.Control_AppAbout),
 				RDLabelTypes.HeaderLeft);
-			Label htl = AndroidSupport.ApplyLabelSettings (aboutPage, "HelpTextLabel",
-				AndroidSupport.GetAppHelpText (), RDLabelTypes.SmallLeft);
+			Label htl = RDInterface.ApplyLabelSettings (aboutPage, "HelpTextLabel",
+				RDGenerics.GetAppHelpText (), RDLabelTypes.SmallLeft);
 			htl.TextType = TextType.Html;
 
 			FontSizeButton_Clicked (null, null);
@@ -193,32 +193,32 @@ namespace RD_AAOW
 			mainLog.SeparatorVisibility = SeparatorVisibility.None;
 			mainLog.ItemAppearing += MainLog_ItemAppearing;
 
-			AndroidSupport.MasterPage.Popped += CurrentPageChanged;
+			RDInterface.MasterPage.Popped += CurrentPageChanged;
 
-			centerButton = AndroidSupport.ApplyButtonSettings (logPage, "CenterButton", " ",
+			centerButton = RDInterface.ApplyButtonSettings (logPage, "CenterButton", " ",
 				logFieldBackColor, CenterButton_Click, false);
 			centerButton.FontSize += 6;
 
-			scrollUpButton = AndroidSupport.ApplyButtonSettings (logPage, "ScrollUp",
+			scrollUpButton = RDInterface.ApplyButtonSettings (logPage, "ScrollUp",
 				RDDefaultButtons.Up, logFieldBackColor, ScrollUpButton_Click);
-			scrollDownButton = AndroidSupport.ApplyButtonSettings (logPage, "ScrollDown",
+			scrollDownButton = RDInterface.ApplyButtonSettings (logPage, "ScrollDown",
 				RDDefaultButtons.Down, logFieldBackColor, ScrollDownButton_Click);
 			centerButton.HeightRequest = centerButton.MaximumHeightRequest = scrollDownButton.HeightRequest;
 
 			// Главный журнал
-			AndroidSupport.ApplyLabelSettings (settingsPage, "LogSettingsLabel",
+			RDInterface.ApplyLabelSettings (settingsPage, "LogSettingsLabel",
 				"Журнал", RDLabelTypes.HeaderLeft);
 
 			// Расположение новых записей в конце журнала
-			Label nates1 = AndroidSupport.ApplyLabelSettings (settingsPage, "NewsAtTheEndLabel",
+			Label nates1 = RDInterface.ApplyLabelSettings (settingsPage, "NewsAtTheEndLabel",
 				"Новые записи – снизу", RDLabelTypes.DefaultLeft);
-			newsAtTheEndSwitch = AndroidSupport.ApplySwitchSettings (settingsPage, "NewsAtTheEndSwitch",
+			newsAtTheEndSwitch = RDInterface.ApplySwitchSettings (settingsPage, "NewsAtTheEndSwitch",
 				false, settingsFieldBackColor, NewsAtTheEndSwitch_Toggled, NotificationsSupport.LogNewsItemsAtTheEnd);
-			Label nates2 = AndroidSupport.ApplyLabelSettings (settingsPage, "NewsAtTheEndTip",
+			Label nates2 = RDInterface.ApplyLabelSettings (settingsPage, "NewsAtTheEndTip",
 				"Опция позволяет добавлять новые записи в конец журнала (снизу). Если выключена, " +
 				"записи добавляются в начало журнала (сверху)", RDLabelTypes.TipLeft);
 
-			if (AndroidSupport.IsTV)
+			if (RDGenerics.IsTV)
 				{
 				nates1.IsVisible = nates2.IsVisible = newsAtTheEndSwitch.IsVisible = false;
 				if (!NotificationsSupport.LogNewsItemsAtTheEnd)
@@ -226,76 +226,76 @@ namespace RD_AAOW
 				}
 
 			// Цвет фона журнала
-			AndroidSupport.ApplyLabelSettings (settingsPage, "LogColorLabel",
+			RDInterface.ApplyLabelSettings (settingsPage, "LogColorLabel",
 				"Цветовая тема:", RDLabelTypes.DefaultLeft);
-			logColorButton = AndroidSupport.ApplyButtonSettings (settingsPage, "LogColorButton",
+			logColorButton = RDInterface.ApplyButtonSettings (settingsPage, "LogColorButton",
 				" ", settingsFieldBackColor, LogColor_Clicked, false);
-			AndroidSupport.ApplyLabelSettings (settingsPage, "LogColorTip",
+			RDInterface.ApplyLabelSettings (settingsPage, "LogColorTip",
 				NotificationsSupport.LogColorTip, RDLabelTypes.TipLeft);
 
 			// Кнопки меню и предложения в журнале
-			menuButton = AndroidSupport.ApplyButtonSettings (logPage, "MenuButton",
+			menuButton = RDInterface.ApplyButtonSettings (logPage, "MenuButton",
 				RDDefaultButtons.Menu, logFieldBackColor, SelectPage);
-			addButton = AndroidSupport.ApplyButtonSettings (logPage, "AddButton",
+			addButton = RDInterface.ApplyButtonSettings (logPage, "AddButton",
 				RDDefaultButtons.Increase, logFieldBackColor, OfferTheRecord);
-			addButton.IsVisible = !AndroidSupport.IsTV;
+			addButton.IsVisible = !RDGenerics.IsTV;
 
 			// Режим полупрозрачности
-			AndroidSupport.ApplyLabelSettings (settingsPage, "TranslucencyLabel",
+			RDInterface.ApplyLabelSettings (settingsPage, "TranslucencyLabel",
 				"Полупрозрачность журнала", RDLabelTypes.DefaultLeft);
-			translucencySwitch = AndroidSupport.ApplySwitchSettings (settingsPage,
+			translucencySwitch = RDInterface.ApplySwitchSettings (settingsPage,
 				"TranslucencySwitch", false, settingsFieldBackColor,
 				Translucency_Toggled, NotificationsSupport.TranslucentLogItems);
-			AndroidSupport.ApplyLabelSettings (settingsPage, "TranslucencyTip",
+			RDInterface.ApplyLabelSettings (settingsPage, "TranslucencyTip",
 				NotificationsSupport.TranslucencyTip, RDLabelTypes.TipLeft);
 
 			LogColor_Clicked (null, null);
 
 			// Размер шрифта журнала
-			fontSizeFieldLabel = AndroidSupport.ApplyLabelSettings (settingsPage, "FontSizeFieldLabel",
+			fontSizeFieldLabel = RDInterface.ApplyLabelSettings (settingsPage, "FontSizeFieldLabel",
 				"", RDLabelTypes.DefaultLeft);
 			fontSizeFieldLabel.TextType = TextType.Html;
 
-			AndroidSupport.ApplyButtonSettings (settingsPage, "FontSizeIncButton",
+			RDInterface.ApplyButtonSettings (settingsPage, "FontSizeIncButton",
 				RDDefaultButtons.Increase, settingsFieldBackColor, FontSizeChanged);
-			AndroidSupport.ApplyButtonSettings (settingsPage, "FontSizeDecButton",
+			RDInterface.ApplyButtonSettings (settingsPage, "FontSizeDecButton",
 				RDDefaultButtons.Decrease, settingsFieldBackColor, FontSizeChanged);
 
-			AndroidSupport.ApplyLabelSettings (settingsPage, "FontSizeFieldTip",
+			RDInterface.ApplyLabelSettings (settingsPage, "FontSizeFieldTip",
 				NotificationsSupport.FontSizeFieldTip, RDLabelTypes.TipLeft);
 
 			FontSizeChanged (null, null);
 
 			// Размер группы запрашиваемых записей
-			groupSizeFieldLabel = AndroidSupport.ApplyLabelSettings (settingsPage, "GroupSizeFieldLabel",
+			groupSizeFieldLabel = RDInterface.ApplyLabelSettings (settingsPage, "GroupSizeFieldLabel",
 				"", RDLabelTypes.DefaultLeft);
 			groupSizeFieldLabel.TextType = TextType.Html;
 
-			AndroidSupport.ApplyButtonSettings (settingsPage, "GroupSizeIncButton",
+			RDInterface.ApplyButtonSettings (settingsPage, "GroupSizeIncButton",
 				RDDefaultButtons.Increase, settingsFieldBackColor, GroupSizeChanged);
-			AndroidSupport.ApplyButtonSettings (settingsPage, "GroupSizeDecButton",
+			RDInterface.ApplyButtonSettings (settingsPage, "GroupSizeDecButton",
 				RDDefaultButtons.Decrease, settingsFieldBackColor, GroupSizeChanged);
-			AndroidSupport.ApplyLabelSettings (settingsPage, "GroupSizeFieldTip",
+			RDInterface.ApplyLabelSettings (settingsPage, "GroupSizeFieldTip",
 				NotificationsSupport.GroupSizeFieldTip, RDLabelTypes.TipLeft);
 
 			GroupSizeChanged (null, null);
 
 			// Цензурирование
-			AndroidSupport.ApplyLabelSettings (settingsPage, "CensorshipLabel",
+			RDInterface.ApplyLabelSettings (settingsPage, "CensorshipLabel",
 				"Цензурирование:", RDLabelTypes.DefaultLeft);
-			censorshipButton = AndroidSupport.ApplyButtonSettings (settingsPage, "CensorshipButton",
+			censorshipButton = RDInterface.ApplyButtonSettings (settingsPage, "CensorshipButton",
 				" ", settingsFieldBackColor, Censorship_Clicked, false);
-			AndroidSupport.ApplyLabelSettings (settingsPage, "CensorshipTip",
+			RDInterface.ApplyLabelSettings (settingsPage, "CensorshipTip",
 				GMJ.CensorshipTip, RDLabelTypes.TipLeft);
 
 			Censorship_Clicked (null, null);
 
 			// Шрифт журнала
-			AndroidSupport.ApplyLabelSettings (settingsPage, "LogFontFamilyLabel",
+			RDInterface.ApplyLabelSettings (settingsPage, "LogFontFamilyLabel",
 				"Шрифт:", RDLabelTypes.DefaultLeft);
-			logFontFamilyButton = AndroidSupport.ApplyButtonSettings (settingsPage, "LogFontFamilyButton",
+			logFontFamilyButton = RDInterface.ApplyButtonSettings (settingsPage, "LogFontFamilyButton",
 				" ", settingsFieldBackColor, LogFontFamily_Clicked, false);
-			AndroidSupport.ApplyLabelSettings (settingsPage, "LogFontFamilyTip",
+			RDInterface.ApplyLabelSettings (settingsPage, "LogFontFamilyTip",
 				"Опция задаёт шрифт текста в журнале: " +
 				"Roboto – без засечек (несколько яркостей), " +
 				"Condensed – без засечек узкий (несколько яркостей), " +
@@ -306,34 +306,34 @@ namespace RD_AAOW
 			LogFontFamily_Clicked (null, null);
 
 			// Настройки картинок
-			Label pictLabel = AndroidSupport.ApplyLabelSettings (settingsPage, "PicturesLabel",
+			Label pictLabel = RDInterface.ApplyLabelSettings (settingsPage, "PicturesLabel",
 				"Сохраняемые картинки", RDLabelTypes.HeaderLeft);
 
 			// Фон картинок
-			Label pictBackLabel1 = AndroidSupport.ApplyLabelSettings (settingsPage, "PicturesBackLabel",
+			Label pictBackLabel1 = RDInterface.ApplyLabelSettings (settingsPage, "PicturesBackLabel",
 				"Фон:", RDLabelTypes.DefaultLeft);
-			pictureBackButton = AndroidSupport.ApplyButtonSettings (settingsPage, "PicturesBackButton",
+			pictureBackButton = RDInterface.ApplyButtonSettings (settingsPage, "PicturesBackButton",
 				" ", settingsFieldBackColor, PictureBack_Clicked, false);
-			Label pictBackLabel2 = AndroidSupport.ApplyLabelSettings (settingsPage, "PicturesBackTip",
+			Label pictBackLabel2 = RDInterface.ApplyLabelSettings (settingsPage, "PicturesBackTip",
 				NotificationsSupport.PicturesBackTip, RDLabelTypes.TipLeft);
 
 			// Выравнивание текста
-			Label pictTextLabel1 = AndroidSupport.ApplyLabelSettings (settingsPage, "PTextLeftLabel",
+			Label pictTextLabel1 = RDInterface.ApplyLabelSettings (settingsPage, "PTextLeftLabel",
 				"Выравнивание:", RDLabelTypes.DefaultLeft);
-			pTextOnTheLeftButton = AndroidSupport.ApplyButtonSettings (settingsPage, "PTextLeftButton",
+			pTextOnTheLeftButton = RDInterface.ApplyButtonSettings (settingsPage, "PTextLeftButton",
 				" ", settingsFieldBackColor, PTextOnTheLeft_Toggled, false);
-			Label pictTextLabel2 = AndroidSupport.ApplyLabelSettings (settingsPage, "PTextLeftTip",
+			Label pictTextLabel2 = RDInterface.ApplyLabelSettings (settingsPage, "PTextLeftTip",
 				NotificationsSupport.PicturesTextAlignmentTip, RDLabelTypes.TipLeft);
 
 			// Подпись картинок
-			Label pictSubsLabel1 = AndroidSupport.ApplyLabelSettings (settingsPage, "PSubsLabel",
+			Label pictSubsLabel1 = RDInterface.ApplyLabelSettings (settingsPage, "PSubsLabel",
 				"Подпись:", RDLabelTypes.DefaultLeft);
-			pSubsButton = AndroidSupport.ApplyButtonSettings (settingsPage, "PSubsButton",
+			pSubsButton = RDInterface.ApplyButtonSettings (settingsPage, "PSubsButton",
 				" ", settingsFieldBackColor, PSubs_Clicked, false);
-			Label pictSubsLabel2 = AndroidSupport.ApplyLabelSettings (settingsPage, "PSubsTip",
+			Label pictSubsLabel2 = RDInterface.ApplyLabelSettings (settingsPage, "PSubsTip",
 				NotificationsSupport.PicturesSubscriptionTip, RDLabelTypes.TipLeft);
 
-			if (AndroidSupport.IsTV)
+			if (RDGenerics.IsTV)
 				{
 				pictLabel.IsVisible =
 					pictBackLabel1.IsVisible = pictBackLabel2.IsVisible = pictureBackButton.IsVisible =
@@ -357,7 +357,7 @@ namespace RD_AAOW
 		// Исправление для сброса текущей позиции журнала
 		private async void CurrentPageChanged (object sender, EventArgs e)
 			{
-			if (AndroidSupport.MasterPage.CurrentPage != logPage)
+			if (RDInterface.MasterPage.CurrentPage != logPage)
 				return;
 
 			needsScroll = true;
@@ -390,29 +390,29 @@ namespace RD_AAOW
 			{
 			// Контроль XPUN
 			if (!flags.HasFlag (RDAppStartupFlags.DisableXPUN))
-				await AndroidSupport.XPUNLoop ();
+				await RDInterface.XPUNLoop ();
 
 			// Требование принятия Политики
 			if (!NotificationsSupport.TipsState.HasFlag (NSTipTypes.PolicyTip))
 				{
-				if (!AndroidSupport.IsTV)
-					await AndroidSupport.PolicyLoop ();
+				if (!RDGenerics.IsTV)
+					await RDInterface.PolicyLoop ();
 				NotificationsSupport.TipsState |= NSTipTypes.PolicyTip;
 				}
 
 			// Подсказки
 			if (!NotificationsSupport.TipsState.HasFlag (NSTipTypes.StartupTips))
 				{
-				await AndroidSupport.ShowMessage ("Добро пожаловать в мини-клиент Grammar must joy!" + RDLocale.RNRN +
+				await RDInterface.ShowMessage ("Добро пожаловать в мини-клиент Grammar must joy!" + RDLocale.RNRN +
 					"• На этой странице Вы можете настроить поведение приложения." + RDLocale.RNRN +
 					"• Используйте системную кнопку «Назад», чтобы вернуться к журналу записей " +
 					"из любого раздела." + RDLocale.RNRN +
 					"• Используйте кнопку с семафором для получения случайных записей из сообщества GMJ",
 					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Next));
 
-				if (AndroidSupport.IsTV)
+				if (RDGenerics.IsTV)
 					{
-					await AndroidSupport.ShowMessage ("Внимание!" + RDLocale.RNRN +
+					await RDInterface.ShowMessage ("Внимание!" + RDLocale.RNRN +
 						"• Убедитесь, что данное устройство имеет выход в интернет. Без него " +
 						"приложение не сможет продолжить работу." + RDLocale.RNRN +
 						"• Ознакомьтесь с описанием проекта в разделе «О приложении» (кнопка ≡). Убедитесь, " +
@@ -421,7 +421,7 @@ namespace RD_AAOW
 					}
 				else
 					{
-					await AndroidSupport.ShowMessage ("Внимание!" + RDLocale.RNRN +
+					await RDInterface.ShowMessage ("Внимание!" + RDLocale.RNRN +
 						"Некоторые устройства требуют ручного разрешения на доступ в интернет " +
 						"(например, если активен режим экономии интернет-трафика). Проверьте его, " +
 						"если запросы не будут работать правильно",
@@ -464,7 +464,7 @@ namespace RD_AAOW
 					break;
 				}
 
-			await AndroidSupport.ShowMessage (msg, RDLocale.GetDefaultText (RDLDefaultTexts.Button_OK));
+			await RDInterface.ShowMessage (msg, RDLocale.GetDefaultText (RDLDefaultTexts.Button_OK));
 			NotificationsSupport.TipsState |= Type;
 			return true;
 			}
@@ -474,9 +474,9 @@ namespace RD_AAOW
 		/// </summary>
 		protected override void OnSleep ()
 			{
-			AndroidSupport.StopRequested = true;
+			RDGenerics.StopRequested = true;
 			NotificationsSupport.SetMasterLog (masterLog);
-			AndroidSupport.AppIsRunning = false;
+			RDGenerics.AppIsRunning = false;
 			}
 
 		/// <summary>
@@ -484,11 +484,11 @@ namespace RD_AAOW
 		/// </summary>
 		protected override void OnResume ()
 			{
-			AndroidSupport.MasterPage.PopToRootAsync (true);
+			RDInterface.MasterPage.PopToRootAsync (true);
 
 			// Запуск цикла обратной связи (без ожидания, на случай, если приложение было свёрнуто, но не закрыто,
 			// а во время ожидания имели место обновления журнала)
-			AndroidSupport.AppIsRunning = true;
+			RDGenerics.AppIsRunning = true;
 			FinishBackgroundRequest ();
 			}
 
@@ -613,7 +613,7 @@ namespace RD_AAOW
 		private async void MainLog_ItemTapped (object sender, ItemTappedEventArgs e)
 			{
 			// Контроль
-			if (AndroidSupport.IsTV)
+			if (RDGenerics.IsTV)
 				return;
 
 			MainLogItem notItem = (MainLogItem)e.Item;
@@ -651,7 +651,7 @@ namespace RD_AAOW
 				tapMenuItems2.Add (new List<string> {
 					"▷\tПерейти к источнику",
 					"☍\tПоделиться текстом",
-					"▒\tПоделиться картинкой",
+					"🖼\tПоделиться картинкой",		// ▒
 					"❏\tСкопировать текст",
 					secondMenuName,
 					});
@@ -669,7 +669,7 @@ namespace RD_AAOW
 					menuVariant++;
 				}
 
-			int menuItem = await AndroidSupport.ShowList ("Выберите действие:",
+			int menuItem = await RDInterface.ShowList ("Выберите действие:",
 				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel),
 				tapMenuItems2[menuVariant]);
 
@@ -683,7 +683,7 @@ namespace RD_AAOW
 			if (secondMenu)
 				{
 				menuVariant = 3;
-				menuItem = await AndroidSupport.ShowList ("Выберите действие:",
+				menuItem = await RDInterface.ShowList ("Выберите действие:",
 					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), tapMenuItems2[menuVariant]);
 				if (menuItem < 0)
 					return;
@@ -714,7 +714,7 @@ namespace RD_AAOW
 						}
 					catch
 						{
-						AndroidSupport.ShowBalloon
+						RDInterface.ShowBalloon
 							(RDLocale.GetDefaultText (RDLDefaultTexts.Message_BrowserNotAvailable), true);
 						}
 					break;
@@ -743,19 +743,19 @@ namespace RD_AAOW
 
 					if (!flags.HasFlag (RDAppStartupFlags.CanWriteFiles))
 						{
-						if (await AndroidSupport.ShowMessage (
+						if (await RDInterface.ShowMessage (
 							RDLocale.GetDefaultText (RDLDefaultTexts.Message_ReadWritePermission) + "." +
 							RDLocale.RNRN + "Перейти к настройкам разрешений приложения?",
 							RDLocale.GetDefaultText (RDLDefaultTexts.Button_Yes),
 							RDLocale.GetDefaultText (RDLDefaultTexts.Button_No)))
-							AndroidSupport.CallAppSettings ();
+							RDInterface.CallAppSettings ();
 						return;
 						}
 
 					GMJPictureTextAlignment pta = NotificationsSupport.PicturesTextAlignment;
 					if (pta == GMJPictureTextAlignment.AskUser)
 						{
-						int res = await AndroidSupport.ShowList ("Выровнять текст:",
+						int res = await RDInterface.ShowList ("Выровнять текст:",
 							RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), pictureTASelectionVariants);
 						if (res < 0)
 							return;
@@ -767,7 +767,7 @@ namespace RD_AAOW
 					switch (NotificationsSupport.PicturesBackgroundType)
 						{
 						case NotificationsSupport.PicturesBackgroundAsk:
-							int res = await AndroidSupport.ShowList ("Использовать фон:",
+							int res = await RDInterface.ShowList ("Использовать фон:",
 								RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), pictureBKSelectionVariants);
 							if (res < 0)
 								return;
@@ -789,7 +789,7 @@ namespace RD_AAOW
 						pta, NotificationsSupport.PictureColors.GetColor ((uint)pbk));
 					if (pict == null)
 						{
-						AndroidSupport.ShowBalloon ("Текст записи не позволяет сформировать картинку", true);
+						RDInterface.ShowBalloon ("Текст записи не позволяет сформировать картинку", true);
 						return;
 						}
 
@@ -812,7 +812,7 @@ namespace RD_AAOW
 			// Переключение состояния кнопок и свичей
 			centerButtonEnabled = State;
 			menuButton.IsVisible = scrollDownButton.IsVisible = scrollUpButton.IsVisible = State;
-			addButton.IsVisible = State && !AndroidSupport.IsTV;
+			addButton.IsVisible = State && !RDGenerics.IsTV;
 
 			// Обновление статуса
 			UpdateLogButton (!State, false);
@@ -844,7 +844,7 @@ namespace RD_AAOW
 			{
 			if (!centerButtonEnabled)
 				{
-				AndroidSupport.ShowBalloon ("Пожалуйста, дождитесь ответа на запрос...", true);
+				RDInterface.ShowBalloon ("Пожалуйста, дождитесь ответа на запрос...", true);
 				return;
 				}
 
@@ -855,10 +855,10 @@ namespace RD_AAOW
 			{
 			// Блокировка на время опроса
 			SetLogState (false);
-			AndroidSupport.ShowBalloon ("Запрос случайной записи...", false);
+			RDInterface.ShowBalloon ("Запрос случайной записи...", false);
 
 			// Запуск и разбор
-			AndroidSupport.StopRequested = false; // Разблокировка метода GetHTML
+			RDGenerics.StopRequested = false; // Разблокировка метода GetHTML
 			string newText = "";
 			uint group = NotificationsSupport.GroupSize;
 			bool success = false;
@@ -872,16 +872,16 @@ namespace RD_AAOW
 				newText = await Task.Run<string> (GMJ.GetRandomGMJ);
 				if (newText == "")
 					{
-					AndroidSupport.ShowBalloon (GMJ.NoConnectionPattern, false);
+					RDInterface.ShowBalloon (GMJ.NoConnectionPattern, false);
 					}
 				else if (newText.Contains (GMJ.SourceNoReturnPattern))
 					{
-					AndroidSupport.ShowBalloon (newText, false);
+					RDInterface.ShowBalloon (newText, false);
 					}
 				else
 					{
 					// Разбиение на экраны
-					if (AndroidSupport.IsTV)
+					if (RDGenerics.IsTV)
 						{
 						int left;
 						const int linesLimit = 9;
@@ -984,7 +984,7 @@ namespace RD_AAOW
 					};
 				}
 
-			int res = await AndroidSupport.ShowList (RDLocale.GetDefaultText (RDLDefaultTexts.Button_GoTo),
+			int res = await RDInterface.ShowList (RDLocale.GetDefaultText (RDLDefaultTexts.Button_GoTo),
 				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), pageVariants);
 			if (res < 0)
 				return;
@@ -993,11 +993,11 @@ namespace RD_AAOW
 			switch (res)
 				{
 				case 0:
-					AndroidSupport.SetCurrentPage (settingsPage, settingsMasterBackColor);
+					RDInterface.SetCurrentPage (settingsPage, settingsMasterBackColor);
 					break;
 
 				case 1:
-					AndroidSupport.SetCurrentPage (aboutPage, aboutMasterBackColor);
+					RDInterface.SetCurrentPage (aboutPage, aboutMasterBackColor);
 					break;
 				}
 			}
@@ -1005,12 +1005,12 @@ namespace RD_AAOW
 		// Предложение записи сообществу
 		private async void OfferTheRecord (object sender, EventArgs e)
 			{
-			if (!await AndroidSupport.ShowMessage (GMJ.SuggestionMessage,
+			if (!await RDInterface.ShowMessage (GMJ.SuggestionMessage,
 				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Yes),
 				RDLocale.GetDefaultText (RDLDefaultTexts.Button_No)))
 				return;
 
-			await AndroidSupport.AskDeveloper ();
+			await RDInterface.AskDeveloper ();
 			}
 
 		#endregion
@@ -1041,11 +1041,11 @@ namespace RD_AAOW
 			if (e != null)
 				{
 				Button b = (Button)sender;
-				if (AndroidSupport.IsNameDefault (b.Text, RDDefaultButtons.Increase) &&
-					(fontSize < AndroidSupport.MaxFontSize))
+				if (RDInterface.IsNameDefault (b.Text, RDDefaultButtons.Increase) &&
+					(fontSize < RDInterface.MaxFontSize))
 					fontSize++;
-				else if (AndroidSupport.IsNameDefault (b.Text, RDDefaultButtons.Decrease) &&
-					(fontSize > AndroidSupport.MinFontSize))
+				else if (RDInterface.IsNameDefault (b.Text, RDDefaultButtons.Decrease) &&
+					(fontSize > RDInterface.MinFontSize))
 					fontSize--;
 
 				NotificationsSupport.LogFontSize = fontSize;
@@ -1069,11 +1069,9 @@ namespace RD_AAOW
 			if (e != null)
 				{
 				Button b = (Button)sender;
-				if (AndroidSupport.IsNameDefault (b.Text, RDDefaultButtons.Increase) &&
-					(groupSize < 5))
+				if (RDInterface.IsNameDefault (b.Text, RDDefaultButtons.Increase) && (groupSize < 5))
 					groupSize++;
-				else if (AndroidSupport.IsNameDefault (b.Text, RDDefaultButtons.Decrease) &&
-					(groupSize > 1))
+				else if (RDInterface.IsNameDefault (b.Text, RDDefaultButtons.Decrease) && (groupSize > 1))
 					groupSize--;
 
 				NotificationsSupport.GroupSize = groupSize;
@@ -1112,7 +1110,7 @@ namespace RD_AAOW
 				}
 			else
 				{
-				res = await AndroidSupport.ShowList ("Фон картинок",
+				res = await RDInterface.ShowList ("Фон картинок",
 					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), pictureBKVariants);
 				if (res < 0)
 					return;
@@ -1148,14 +1146,14 @@ namespace RD_AAOW
 				}
 			else
 				{
-				res = await AndroidSupport.ShowList ("Выравнивание текста",
+				res = await RDInterface.ShowList ("Выравнивание текста",
 					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), pictureTAVariants);
 				if (res < 0)
 					return;
 
 				NotificationsSupport.PicturesTextAlignment = (GMJPictureTextAlignment)res;
 				if (NotificationsSupport.PicturesTextAlignment == GMJPictureTextAlignment.BasedOnDialogues)
-					await AndroidSupport.ShowMessage (NotificationsSupport.PicturesTextAlignmentDialoguesTip,
+					await RDInterface.ShowMessage (NotificationsSupport.PicturesTextAlignmentDialoguesTip,
 						RDLocale.GetDefaultText (RDLDefaultTexts.Button_OK));
 				}
 
@@ -1174,7 +1172,7 @@ namespace RD_AAOW
 				}
 			else
 				{
-				sub = await AndroidSupport.ShowInput ("Подпись картинок",
+				sub = await RDInterface.ShowInput ("Подпись картинок",
 					"Введите подпись, которая будет добавляться на сохраняемые картинки",
 					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Save),
 					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel),
@@ -1213,7 +1211,7 @@ namespace RD_AAOW
 				return;
 				}
 
-			res = await AndroidSupport.ShowList ("Цензурирование",
+			res = await RDInterface.ShowList ("Цензурирование",
 				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), censorshipVariants);
 			if (res < 0)
 				return;
@@ -1221,7 +1219,7 @@ namespace RD_AAOW
 			// Контроль
 			string msg = (res > 0) ? GMJ.CensorshipEnableMessage2 : GMJ.CensorshipDisableMessage2;
 			bool doReset = false;
-			if (await AndroidSupport.ShowMessage (msg, RDLocale.GetDefaultText (RDLDefaultTexts.Button_Yes),
+			if (await RDInterface.ShowMessage (msg, RDLocale.GetDefaultText (RDLDefaultTexts.Button_Yes),
 				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel)))
 				{
 				GMJ.EnableCensorship = (res > 0);
@@ -1230,7 +1228,7 @@ namespace RD_AAOW
 				}
 
 			msg = (res > 0) ? GMJ.CensorshipEnableResetMessage : GMJ.CensorshipDisableResetMessage;
-			if (doReset && await AndroidSupport.ShowMessage (msg, RDLocale.GetDefaultText (RDLDefaultTexts.Button_Yes),
+			if (doReset && await RDInterface.ShowMessage (msg, RDLocale.GetDefaultText (RDLDefaultTexts.Button_Yes),
 				RDLocale.GetDefaultText (RDLDefaultTexts.Button_No)))
 				{
 				GMJ.ResetFreeSet ();
@@ -1251,7 +1249,7 @@ namespace RD_AAOW
 				}
 			else
 				{
-				res = await AndroidSupport.ShowList ("Цветовая тема журнала",
+				res = await RDInterface.ShowList ("Цветовая тема журнала",
 					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), logColorVariants);
 				if (res < 0)
 					return;
@@ -1306,7 +1304,7 @@ namespace RD_AAOW
 			// Запрос варианта
 			if (logFontFamilyVariants.Count < 1)
 				{
-				string[][] fonts = AndroidSupport.AvailableFonts;
+				string[][] fonts = RDGenerics.AvailableFonts;
 				for (int i = 0; i < fonts.Length; i++)
 					{
 					logFontFamilyVariants.Add (fonts[i][0]);
@@ -1317,16 +1315,16 @@ namespace RD_AAOW
 			int res;
 			if (sender == null)
 				{
-				res = (int)AndroidSupport.LogFontFamily;
+				res = (int)RDGenerics.LogFontFamily;
 				}
 			else
 				{
-				res = await AndroidSupport.ShowList ("Шрифт журнала",
+				res = await RDInterface.ShowList ("Шрифт журнала",
 					RDLocale.GetDefaultText (RDLDefaultTexts.Button_Cancel), logFontFamilyVariants);
 				if (res < 0)
 					return;
 
-				AndroidSupport.LogFontFamily = (uint)res;
+				RDGenerics.LogFontFamily = (uint)res;
 				}
 
 			// Сохранение и отображение настройки в интерфейсе
@@ -1334,7 +1332,7 @@ namespace RD_AAOW
 
 			string ff;
 			FontAttributes fa;
-			AndroidSupport.GetCurrentFontFamily (out ff, out fa);
+			RDGenerics.GetCurrentFontFamily (out ff, out fa);
 
 			logFontFamilyButton.FontAttributes = fa;
 			logFontFamilyButton.FontFamily = ff;
@@ -1354,21 +1352,21 @@ namespace RD_AAOW
 		// Вызов справочных материалов
 		private async void ReferenceButton_Click (object sender, EventArgs e)
 			{
-			if (AndroidSupport.IsTV)
+			if (RDGenerics.IsTV)
 				{
-				await AndroidSupport.ShowMessage ("Для доступа к помощи, поддержке и справочным материалам " +
+				await RDInterface.ShowMessage ("Для доступа к помощи, поддержке и справочным материалам " +
 					"воспользуйтесь QR-кодом, представленным ниже." + RDLocale.RNRN +
 					"Далее на этой странице доступно сокращённое описание приложения",
 					RDLocale.GetDefaultText (RDLDefaultTexts.Button_OK));
 				return;
 				}
 
-			await AndroidSupport.CallHelpMaterials (RDHelpMaterials.ReferenceMaterials);
+			await RDInterface.CallHelpMaterials (RDHelpMaterials.ReferenceMaterials);
 			}
 
 		private async void HelpButton_Click (object sender, EventArgs e)
 			{
-			await AndroidSupport.CallHelpMaterials (RDHelpMaterials.HelpAndSupport);
+			await RDInterface.CallHelpMaterials (RDHelpMaterials.HelpAndSupport);
 			}
 
 		// Изменение размера шрифта интерфейса
@@ -1377,20 +1375,20 @@ namespace RD_AAOW
 			if (sender != null)
 				{
 				Button b = (Button)sender;
-				if (AndroidSupport.IsNameDefault (b.Text, RDDefaultButtons.Increase))
-					AndroidSupport.MasterFontSize += 0.5;
-				else if (AndroidSupport.IsNameDefault (b.Text, RDDefaultButtons.Decrease))
-					AndroidSupport.MasterFontSize -= 0.5;
+				if (RDInterface.IsNameDefault (b.Text, RDDefaultButtons.Increase))
+					RDInterface.MasterFontSize += 0.5;
+				else if (RDInterface.IsNameDefault (b.Text, RDDefaultButtons.Decrease))
+					RDInterface.MasterFontSize -= 0.5;
 				}
 
-			aboutFontSizeField.Text = AndroidSupport.MasterFontSize.ToString ("F1");
-			aboutFontSizeField.FontSize = AndroidSupport.MasterFontSize;
+			aboutFontSizeField.Text = RDInterface.MasterFontSize.ToString ("F1");
+			aboutFontSizeField.FontSize = RDInterface.MasterFontSize;
 			}
 
 		// Отображение статистики архива
 		private async void StatsButton_Click (object sender, EventArgs e)
 			{
-			await AndroidSupport.ShowMessage (GMJ.GMJStats, RDLocale.GetDefaultText (RDLDefaultTexts.Button_OK));
+			await RDInterface.ShowMessage (GMJ.GMJStats, RDLocale.GetDefaultText (RDLDefaultTexts.Button_OK));
 			}
 
 		#endregion

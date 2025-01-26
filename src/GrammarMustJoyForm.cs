@@ -232,10 +232,10 @@ namespace RD_AAOW
 		private void GetGMJ_Click (object sender, EventArgs e)
 			{
 			// Запрос записи
-			RDGenerics.RunWork (GetGMJExecutor, null, "Запрос случайной записи...",
+			RDInterface.RunWork (GetGMJExecutor, null, "Запрос случайной записи...",
 				RDRunWorkFlags.CaptionInTheMiddle);
 
-			string[] values = RDGenerics.WorkResultAsString.Split (groupSplitter,
+			string[] values = RDInterface.WorkResultAsString.Split (groupSplitter,
 				StringSplitOptions.RemoveEmptyEntries);
 
 			if (values.Length < 1)
@@ -260,7 +260,7 @@ namespace RD_AAOW
 
 			int amount = NotificationsSupport.TranslucentLogItems ? translucencyAmount : 0;
 			if (err)
-				l.BackColor = RDGenerics.GetInterfaceColor (RDInterfaceColors.WarningMessage);
+				l.BackColor = RDInterface.GetInterfaceColor (RDInterfaceColors.WarningMessage);
 			else if (NotificationsSupport.LogColors.CurrentColor.IsBright)
 				l.BackColor = Color.FromArgb (amount, 0, 0, 0);
 			else
@@ -270,7 +270,7 @@ namespace RD_AAOW
 			l.Font = new Font (fontFamily, NotificationsSupport.LogFontSize / 10.0f);
 
 			if (err)
-				l.ForeColor = RDGenerics.GetInterfaceColor (RDInterfaceColors.ErrorText);
+				l.ForeColor = RDInterface.GetInterfaceColor (RDInterfaceColors.ErrorText);
 			else
 				l.ForeColor = NotificationsSupport.LogColors.CurrentColor.MainTextColor;
 
@@ -386,7 +386,7 @@ namespace RD_AAOW
 			switch (idx)
 				{
 				case 0:
-					RDGenerics.MessageBox (RDMessageTypes.Information_Left, GMJ.GMJStats);
+					RDInterface.MessageBox (RDMessageTypes.Information_Left, GMJ.GMJStats);
 					break;
 
 				case 1:
@@ -394,7 +394,7 @@ namespace RD_AAOW
 					break;
 
 				case 2:
-					RDGenerics.ShowAbout (false);
+					RDInterface.ShowAbout (false);
 					break;
 
 				case 3:
@@ -407,7 +407,7 @@ namespace RD_AAOW
 		// Предложение записей
 		private void BAdd_Click (object sender, EventArgs e)
 			{
-			if (RDGenerics.MessageBox (RDMessageTypes.Question_Center, GMJ.SuggestionMessage,
+			if (RDInterface.MessageBox (RDMessageTypes.Question_Center, GMJ.SuggestionMessage,
 				RDLocale.GetDefaultText (RDLDefaultTexts.Button_Yes),
 				RDLocale.GetDefaultText (RDLDefaultTexts.Button_No)) != RDMessageButtons.ButtonOne)
 				return;
