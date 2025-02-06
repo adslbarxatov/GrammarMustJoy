@@ -4,7 +4,8 @@
 
 Мини-клиент сообщества Grammar must joy.
 
-Подробное описание приложения доступно на [отдельной странице](https://adslbarxatov.github.io/GrammarMustJoy).
+:warning: ***Продукт заменён клиентом [JokesArray](https://adslbarxatov.github.io/JokesArray).
+Данный репозиторий более не будет получать обновления***
 
 ---
 
